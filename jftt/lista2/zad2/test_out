@@ -1,0 +1,24 @@
+
+with Ada.Text_IO;       with Ada.Integer_Text_IO; 
+procedure Dodawanie is
+      Liczba1, Liczba2, Suma : Integer;
+
+begin
+      Ada.Text_IO.Put_Line("Program do dodawania dwóch liczb");
+
+      Ada.Text_IO.Put("Podaj pierwszą liczbę: ");
+   Ada.Integer_Text_IO.Get(Liczba1);
+
+      Ada.Text_IO.Put("Podaj drugą liczbę: ");
+   Ada.Integer_Text_IO.Get(Liczba2);
+
+      Suma := Liczba1 + Liczba2;
+
+      Ada.Text_IO.Put("Suma liczb ");
+   Ada.Integer_Text_IO.Put(Liczba1);
+   Ada.Text_IO.Put(" i ");
+   Ada.Integer_Text_IO.Put(Liczba2);
+   Ada.Text_IO.Put(" wynosi: ");
+   Ada.Integer_Text_IO.Put(Suma);
+   Ada.Text_IO.New_Line; 
+end Dodawanie;
