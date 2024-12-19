@@ -1,0 +1,176 @@
+%require "3.2"
+%language "c++"
+
+%define api.parser.class {Parser}
+%define api.value.type variant
+%define api.token.raw
+%define api.token.constructor
+
+%define parse.assert
+%define parse.trace
+%define parse.error detailed
+%define parse.lac full
+
+%locations
+
+%param {yy::Scanner &scanner}
+
+%code requires
+{
+
+#include "ast.hpp"
+#include <string>
+#include <memory>
+
+namespace yy {
+    class Scanner;
+}
+}
+
+%code {
+#include "scanner.hpp"
+
+
+yy::Parser::symbol_type yylex(yy::Scanner &scanner) {
+    return scanner.scan();
+}
+}
+
+%token KW_IF 
+%token KW_ELSE
+%token NEWLINE
+%token KW_PROCEDURE 
+%token KW_IS 
+%token KW_BEGIN 
+%token KW_END
+%token KW_PROGRAM
+%token KW_THEN
+%token KW_ENDIF
+%token KW_WHILE 
+%token KW_DO
+%token KW_ENDWHILE
+%token KW_REPEAT
+%token KW_UNTIL
+%token KW_FOR
+%token KW_FROM
+%token KW_ENDFOR
+%token KW_DOWNTO
+%token KW_READ
+%token KW_WRITE
+%token KW_TO
+%token KW_T
+
+%token EQUAL
+%token NEQUAL
+%token LESS
+%token MORE
+%token LESSOREQUAL
+%token MOREOREQUAL
+
+%token ASSIGN
+
+%token SEMICOLON
+%token COLON
+%token COMMA
+%token LPRNT
+%token RPRNT
+%token LBRACKET
+%token RBRACKET
+
+%token PLUS 
+%token MINUS
+%token MULT
+%token DIV
+%token MOD
+  
+%token <long long> NUM
+%token <std::string> PIDENTIFIER
+
+%type <std::unique_ptr<Identifier>> identifier
+%type <std::unique_ptr<Value>> value
+%type <std::unique_ptr<Node>> command
+
+%%
+program_all: 
+        procedures main
+
+procedures: 
+        procedures KW_PROCEDURE proc_head KW_IS declarations KW_BEGIN commands KW_END
+        | procedures KW_PROCEDURE proc_head KW_IS KW_BEGIN commands KW_END
+        | 
+
+
+main: 
+        KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END { std::cout << "KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END" << std::endl; }
+        | KW_PROGRAM KW_IS KW_BEGIN commands KW_END { std::cout << "KW_PROGRAM KW_IS KW_BEGIN commands KW_END" << std::endl; }
+
+commands:
+        commands command { std::cout << "commands command" << std::endl; }
+        | command { std::cout << "command" << std::endl; }
+
+command:
+        identifier ASSIGN expression SEMICOLON { std::cout << "identifier ASSIGN expression;" << std::endl; }
+        | KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF { std::cout << "KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF" << std::endl; }
+        | KW_IF condition KW_THEN commands KW_ENDIF { std::cout << "KW_IF condition KW_THEN commands KW_ENDIF" << std::endl; }
+        | KW_WHILE condition KW_DO commands KW_ENDWHILE { std::cout << "KW_WHILE condition KW_DO commands KW_ENDWHILE" << std::endl; }
+        | KW_REPEAT commands KW_UNTIL condition SEMICOLON { std::cout << "KW_REPEAT commands KW_UNTIL condition;" << std::endl; }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR { std::cout << "KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR" << std::endl; }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR { std::cout << "KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR" << std::endl; }
+        | proc_call SEMICOLON { std::cout << "proc_call;" << std::endl; }
+        | KW_READ identifier SEMICOLON { }
+        | KW_WRITE value SEMICOLON { std::cout << "KW_WRITE value;" << std::endl; }
+
+proc_head:
+        PIDENTIFIER LPRNT args_decl RPRNT { std::cout << "PIDENTIFIER(args_decl)" << std::endl; }
+
+proc_call:
+        PIDENTIFIER LPRNT args RPRNT { std::cout << "PIDENTIFIER(args)" << std::endl; }
+
+declarations:
+        declarations COMMA PIDENTIFIER { std::cout << "declarations, PIDENTIFIER" << std::endl; }
+        | declarations COMMA PIDENTIFIER LBRACKET NUM COLON NUM RBRACKET { std::cout << "declarations, PIDENTIFIER[NUM:NUM]" << std::endl; }
+        | PIDENTIFIER { std::cout << "pidentifier1" << std::endl; }
+        | PIDENTIFIER LBRACKET NUM COLON NUM RBRACKET { std::cout << "PIDENTIFIER[NUM:NUM]" << std::endl; }
+
+args_decl:
+        args_decl COMMA PIDENTIFIER { std::cout << "args_decl, PIDENTIFIER" << std::endl; }
+        | args_decl COMMA KW_T PIDENTIFIER { std::cout << "args_decl, T PIDENTIFIER" << std::endl; }
+        | PIDENTIFIER { std::cout << "pidentifier2" << std::endl; }
+        | KW_T PIDENTIFIER { std::cout << "T PIDENTIFIER" << std::endl; }
+
+args:
+        args COMMA PIDENTIFIER { std::cout << "args, PIDENTIFIER" << std::endl; }
+        | PIDENTIFIER { std::cout << "pidentifier3" << std::endl; }
+
+expression:
+        value { std::cout << "value" << std::endl; }
+        | value PLUS value { std::cout << "value + value" << std::endl; }
+        | value MINUS value { std::cout << "value - value" << std::endl; }
+        | value MULT value { std::cout << "value * value" << std::endl; }
+        | value DIV value { std::cout << "value / value" << std::endl; }
+        | value MOD value { std::cout << "value % value" << std::endl; }
+
+condition:
+        value EQUAL value { std::cout << "value == value" << std::endl; }
+        | value NEQUAL value { std::cout << "value != value" << std::endl; }
+        | value MORE value { std::cout << "value > value" << std::endl; }
+        | value LESS value { std::cout << "value < value" << std::endl; }
+        | value MOREOREQUAL value { std::cout << "value >= value" << std::endl; }
+        | value LESSOREQUAL value { std::cout << "value <= value" << std::endl; }
+
+value:
+        NUM { $$ = std::make_unique<Value>($1, ValueEnum::NUM); }
+        | identifier { $$ = std::make_unique<Value>(std::move($1), ValueEnum::ID); }
+
+identifier:
+        PIDENTIFIER { $$ = std::make_unique<Identifier>($1, IdentifierEnum::PID); }
+        | PIDENTIFIER LBRACKET PIDENTIFIER RBRACKET {  $$ = std::make_unique<Identifier>($1, $3, IdentifierEnum::PIDTPID); }
+        | PIDENTIFIER LBRACKET NUM RBRACKET {  $$ = std::make_unique<Identifier>($1, $3, IdentifierEnum::PIDT); }
+
+
+%%
+
+void yy::Parser::error(const location_type& loc, const std::string& msg)
+{
+    std::cout << "ERROR at "<< loc << ", message: " << msg << std::endl;
+}
