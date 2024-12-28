@@ -1,0 +1,1 @@
+g++ -std=c++17 -o compiler main.cpp parser.cpp scanner.cpp ast.cpp SymbolTable.cpp functions/validIdentifier.cpp

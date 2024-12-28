@@ -416,19 +416,50 @@ namespace yy {
     union union_type
     {
       // NUM
+      // number
       char dummy1[sizeof (long long)];
 
-      // PIDENTIFIER
-      char dummy2[sizeof (std::string)];
+      // command
+      char dummy2[sizeof (std::shared_ptr<Command>)];
+
+      // condition
+      char dummy3[sizeof (std::shared_ptr<Condition>)];
+
+      // expression
+      char dummy4[sizeof (std::shared_ptr<Expression>)];
 
       // identifier
-      char dummy3[sizeof (std::unique_ptr<Identifier>)];
+      char dummy5[sizeof (std::shared_ptr<Identifier>)];
 
-      // command
-      char dummy4[sizeof (std::unique_ptr<Node>)];
+      // main
+      char dummy6[sizeof (std::shared_ptr<Main>)];
+
+      // proc_call
+      char dummy7[sizeof (std::shared_ptr<ProcCall>)];
+
+      // proc_head
+      char dummy8[sizeof (std::shared_ptr<ProcHead>)];
 
       // value
-      char dummy5[sizeof (std::unique_ptr<Value>)];
+      char dummy9[sizeof (std::shared_ptr<Value>)];
+
+      // PIDENTIFIER
+      char dummy10[sizeof (std::string)];
+
+      // args
+      char dummy11[sizeof (std::vector<std::shared_ptr<Args>>)];
+
+      // args_decl
+      char dummy12[sizeof (std::vector<std::shared_ptr<ArgsDeclaration>>)];
+
+      // commands
+      char dummy13[sizeof (std::vector<std::shared_ptr<Command>>)];
+
+      // declarations
+      char dummy14[sizeof (std::vector<std::shared_ptr<Declaration>>)];
+
+      // procedures
+      char dummy15[sizeof (std::vector<std::shared_ptr<Procedure>>)];
     };
 
     /// The size of the largest semantic type.
@@ -518,13 +549,14 @@ namespace yy {
     RPRNT = 37,                    // RPRNT
     LBRACKET = 38,                 // LBRACKET
     RBRACKET = 39,                 // RBRACKET
-    PLUS = 40,                     // PLUS
-    MINUS = 41,                    // MINUS
-    MULT = 42,                     // MULT
-    DIV = 43,                      // DIV
-    MOD = 44,                      // MOD
-    NUM = 45,                      // NUM
-    PIDENTIFIER = 46               // PIDENTIFIER
+    UMINUS = 40,                   // UMINUS
+    PLUS = 41,                     // PLUS
+    MINUS = 42,                    // MINUS
+    MULT = 43,                     // MULT
+    DIV = 44,                      // DIV
+    MOD = 45,                      // MOD
+    NUM = 46,                      // NUM
+    PIDENTIFIER = 47               // PIDENTIFIER
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -541,7 +573,7 @@ namespace yy {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 47, ///< Number of tokens.
+        YYNTOKENS = 48, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end of file"
         S_YYerror = 1,                           // error
@@ -583,28 +615,30 @@ namespace yy {
         S_RPRNT = 37,                            // RPRNT
         S_LBRACKET = 38,                         // LBRACKET
         S_RBRACKET = 39,                         // RBRACKET
-        S_PLUS = 40,                             // PLUS
-        S_MINUS = 41,                            // MINUS
-        S_MULT = 42,                             // MULT
-        S_DIV = 43,                              // DIV
-        S_MOD = 44,                              // MOD
-        S_NUM = 45,                              // NUM
-        S_PIDENTIFIER = 46,                      // PIDENTIFIER
-        S_YYACCEPT = 47,                         // $accept
-        S_program_all = 48,                      // program_all
-        S_procedures = 49,                       // procedures
-        S_main = 50,                             // main
-        S_commands = 51,                         // commands
-        S_command = 52,                          // command
-        S_proc_head = 53,                        // proc_head
-        S_proc_call = 54,                        // proc_call
-        S_declarations = 55,                     // declarations
-        S_args_decl = 56,                        // args_decl
-        S_args = 57,                             // args
-        S_expression = 58,                       // expression
-        S_condition = 59,                        // condition
-        S_value = 60,                            // value
-        S_identifier = 61                        // identifier
+        S_UMINUS = 40,                           // UMINUS
+        S_PLUS = 41,                             // PLUS
+        S_MINUS = 42,                            // MINUS
+        S_MULT = 43,                             // MULT
+        S_DIV = 44,                              // DIV
+        S_MOD = 45,                              // MOD
+        S_NUM = 46,                              // NUM
+        S_PIDENTIFIER = 47,                      // PIDENTIFIER
+        S_YYACCEPT = 48,                         // $accept
+        S_program_all = 49,                      // program_all
+        S_procedures = 50,                       // procedures
+        S_main = 51,                             // main
+        S_commands = 52,                         // commands
+        S_command = 53,                          // command
+        S_proc_head = 54,                        // proc_head
+        S_proc_call = 55,                        // proc_call
+        S_declarations = 56,                     // declarations
+        S_args_decl = 57,                        // args_decl
+        S_args = 58,                             // args
+        S_expression = 59,                       // expression
+        S_condition = 60,                        // condition
+        S_value = 61,                            // value
+        S_number = 62,                           // number
+        S_identifier = 63                        // identifier
       };
     };
 
@@ -642,23 +676,64 @@ namespace yy {
         switch (this->kind ())
     {
       case symbol_kind::S_NUM: // NUM
+      case symbol_kind::S_number: // number
         value.move< long long > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_command: // command
+        value.move< std::shared_ptr<Command> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_condition: // condition
+        value.move< std::shared_ptr<Condition> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+        value.move< std::shared_ptr<Expression> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_identifier: // identifier
+        value.move< std::shared_ptr<Identifier> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_main: // main
+        value.move< std::shared_ptr<Main> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_proc_call: // proc_call
+        value.move< std::shared_ptr<ProcCall> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_proc_head: // proc_head
+        value.move< std::shared_ptr<ProcHead> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_value: // value
+        value.move< std::shared_ptr<Value> > (std::move (that.value));
         break;
 
       case symbol_kind::S_PIDENTIFIER: // PIDENTIFIER
         value.move< std::string > (std::move (that.value));
         break;
 
-      case symbol_kind::S_identifier: // identifier
-        value.move< std::unique_ptr<Identifier> > (std::move (that.value));
+      case symbol_kind::S_args: // args
+        value.move< std::vector<std::shared_ptr<Args>> > (std::move (that.value));
         break;
 
-      case symbol_kind::S_command: // command
-        value.move< std::unique_ptr<Node> > (std::move (that.value));
+      case symbol_kind::S_args_decl: // args_decl
+        value.move< std::vector<std::shared_ptr<ArgsDeclaration>> > (std::move (that.value));
         break;
 
-      case symbol_kind::S_value: // value
-        value.move< std::unique_ptr<Value> > (std::move (that.value));
+      case symbol_kind::S_commands: // commands
+        value.move< std::vector<std::shared_ptr<Command>> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_declarations: // declarations
+        value.move< std::vector<std::shared_ptr<Declaration>> > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_procedures: // procedures
+        value.move< std::vector<std::shared_ptr<Procedure>> > (std::move (that.value));
         break;
 
       default:
@@ -699,6 +774,118 @@ namespace yy {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Command>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Command>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Condition>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Condition>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Expression>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Expression>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Identifier>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Identifier>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Main>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Main>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<ProcCall>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<ProcCall>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<ProcHead>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<ProcHead>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::shared_ptr<Value>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::shared_ptr<Value>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, std::string&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -713,13 +900,13 @@ namespace yy {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t, std::unique_ptr<Identifier>&& v, location_type&& l)
+      basic_symbol (typename Base::kind_type t, std::vector<std::shared_ptr<Args>>&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
         , location (std::move (l))
       {}
 #else
-      basic_symbol (typename Base::kind_type t, const std::unique_ptr<Identifier>& v, const location_type& l)
+      basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Args>>& v, const location_type& l)
         : Base (t)
         , value (v)
         , location (l)
@@ -727,13 +914,13 @@ namespace yy {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t, std::unique_ptr<Node>&& v, location_type&& l)
+      basic_symbol (typename Base::kind_type t, std::vector<std::shared_ptr<ArgsDeclaration>>&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
         , location (std::move (l))
       {}
 #else
-      basic_symbol (typename Base::kind_type t, const std::unique_ptr<Node>& v, const location_type& l)
+      basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<ArgsDeclaration>>& v, const location_type& l)
         : Base (t)
         , value (v)
         , location (l)
@@ -741,13 +928,41 @@ namespace yy {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
-      basic_symbol (typename Base::kind_type t, std::unique_ptr<Value>&& v, location_type&& l)
+      basic_symbol (typename Base::kind_type t, std::vector<std::shared_ptr<Command>>&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
         , location (std::move (l))
       {}
 #else
-      basic_symbol (typename Base::kind_type t, const std::unique_ptr<Value>& v, const location_type& l)
+      basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Command>>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<std::shared_ptr<Declaration>>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Declaration>>& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, std::vector<std::shared_ptr<Procedure>>&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const std::vector<std::shared_ptr<Procedure>>& v, const location_type& l)
         : Base (t)
         , value (v)
         , location (l)
@@ -779,23 +994,64 @@ namespace yy {
 switch (yykind)
     {
       case symbol_kind::S_NUM: // NUM
+      case symbol_kind::S_number: // number
         value.template destroy< long long > ();
+        break;
+
+      case symbol_kind::S_command: // command
+        value.template destroy< std::shared_ptr<Command> > ();
+        break;
+
+      case symbol_kind::S_condition: // condition
+        value.template destroy< std::shared_ptr<Condition> > ();
+        break;
+
+      case symbol_kind::S_expression: // expression
+        value.template destroy< std::shared_ptr<Expression> > ();
+        break;
+
+      case symbol_kind::S_identifier: // identifier
+        value.template destroy< std::shared_ptr<Identifier> > ();
+        break;
+
+      case symbol_kind::S_main: // main
+        value.template destroy< std::shared_ptr<Main> > ();
+        break;
+
+      case symbol_kind::S_proc_call: // proc_call
+        value.template destroy< std::shared_ptr<ProcCall> > ();
+        break;
+
+      case symbol_kind::S_proc_head: // proc_head
+        value.template destroy< std::shared_ptr<ProcHead> > ();
+        break;
+
+      case symbol_kind::S_value: // value
+        value.template destroy< std::shared_ptr<Value> > ();
         break;
 
       case symbol_kind::S_PIDENTIFIER: // PIDENTIFIER
         value.template destroy< std::string > ();
         break;
 
-      case symbol_kind::S_identifier: // identifier
-        value.template destroy< std::unique_ptr<Identifier> > ();
+      case symbol_kind::S_args: // args
+        value.template destroy< std::vector<std::shared_ptr<Args>> > ();
         break;
 
-      case symbol_kind::S_command: // command
-        value.template destroy< std::unique_ptr<Node> > ();
+      case symbol_kind::S_args_decl: // args_decl
+        value.template destroy< std::vector<std::shared_ptr<ArgsDeclaration>> > ();
         break;
 
-      case symbol_kind::S_value: // value
-        value.template destroy< std::unique_ptr<Value> > ();
+      case symbol_kind::S_commands: // commands
+        value.template destroy< std::vector<std::shared_ptr<Command>> > ();
+        break;
+
+      case symbol_kind::S_declarations: // declarations
+        value.template destroy< std::vector<std::shared_ptr<Declaration>> > ();
+        break;
+
+      case symbol_kind::S_procedures: // procedures
+        value.template destroy< std::vector<std::shared_ptr<Procedure>> > ();
         break;
 
       default:
@@ -1574,6 +1830,21 @@ switch (yykind)
 #if 201103L <= YY_CPLUSPLUS
       static
       symbol_type
+      make_UMINUS (location_type l)
+      {
+        return symbol_type (token::UMINUS, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_UMINUS (const location_type& l)
+      {
+        return symbol_type (token::UMINUS, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
       make_PLUS (location_type l)
       {
         return symbol_type (token::PLUS, std::move (l));
@@ -1759,7 +2030,7 @@ switch (yykind)
     static const signed char yydefact_[];
 
     // YYPGOTO[NTERM-NUM].
-    static const short yypgoto_[];
+    static const signed char yypgoto_[];
 
     // YYDEFGOTO[NTERM-NUM].
     static const signed char yydefgoto_[];
@@ -2020,8 +2291,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 276,     ///< Last index in yytable_.
-      yynnts_ = 15,  ///< Number of nonterminal symbols.
+      yylast_ = 297,     ///< Last index in yytable_.
+      yynnts_ = 16,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
@@ -2048,23 +2319,64 @@ switch (yykind)
     switch (this->kind ())
     {
       case symbol_kind::S_NUM: // NUM
+      case symbol_kind::S_number: // number
         value.copy< long long > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_command: // command
+        value.copy< std::shared_ptr<Command> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_condition: // condition
+        value.copy< std::shared_ptr<Condition> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+        value.copy< std::shared_ptr<Expression> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_identifier: // identifier
+        value.copy< std::shared_ptr<Identifier> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_main: // main
+        value.copy< std::shared_ptr<Main> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_proc_call: // proc_call
+        value.copy< std::shared_ptr<ProcCall> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_proc_head: // proc_head
+        value.copy< std::shared_ptr<ProcHead> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_value: // value
+        value.copy< std::shared_ptr<Value> > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_PIDENTIFIER: // PIDENTIFIER
         value.copy< std::string > (YY_MOVE (that.value));
         break;
 
-      case symbol_kind::S_identifier: // identifier
-        value.copy< std::unique_ptr<Identifier> > (YY_MOVE (that.value));
+      case symbol_kind::S_args: // args
+        value.copy< std::vector<std::shared_ptr<Args>> > (YY_MOVE (that.value));
         break;
 
-      case symbol_kind::S_command: // command
-        value.copy< std::unique_ptr<Node> > (YY_MOVE (that.value));
+      case symbol_kind::S_args_decl: // args_decl
+        value.copy< std::vector<std::shared_ptr<ArgsDeclaration>> > (YY_MOVE (that.value));
         break;
 
-      case symbol_kind::S_value: // value
-        value.copy< std::unique_ptr<Value> > (YY_MOVE (that.value));
+      case symbol_kind::S_commands: // commands
+        value.copy< std::vector<std::shared_ptr<Command>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_declarations: // declarations
+        value.copy< std::vector<std::shared_ptr<Declaration>> > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_procedures: // procedures
+        value.copy< std::vector<std::shared_ptr<Procedure>> > (YY_MOVE (that.value));
         break;
 
       default:
@@ -2099,23 +2411,64 @@ switch (yykind)
     switch (this->kind ())
     {
       case symbol_kind::S_NUM: // NUM
+      case symbol_kind::S_number: // number
         value.move< long long > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_command: // command
+        value.move< std::shared_ptr<Command> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_condition: // condition
+        value.move< std::shared_ptr<Condition> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_expression: // expression
+        value.move< std::shared_ptr<Expression> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_identifier: // identifier
+        value.move< std::shared_ptr<Identifier> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_main: // main
+        value.move< std::shared_ptr<Main> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_proc_call: // proc_call
+        value.move< std::shared_ptr<ProcCall> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_proc_head: // proc_head
+        value.move< std::shared_ptr<ProcHead> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_value: // value
+        value.move< std::shared_ptr<Value> > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_PIDENTIFIER: // PIDENTIFIER
         value.move< std::string > (YY_MOVE (s.value));
         break;
 
-      case symbol_kind::S_identifier: // identifier
-        value.move< std::unique_ptr<Identifier> > (YY_MOVE (s.value));
+      case symbol_kind::S_args: // args
+        value.move< std::vector<std::shared_ptr<Args>> > (YY_MOVE (s.value));
         break;
 
-      case symbol_kind::S_command: // command
-        value.move< std::unique_ptr<Node> > (YY_MOVE (s.value));
+      case symbol_kind::S_args_decl: // args_decl
+        value.move< std::vector<std::shared_ptr<ArgsDeclaration>> > (YY_MOVE (s.value));
         break;
 
-      case symbol_kind::S_value: // value
-        value.move< std::unique_ptr<Value> > (YY_MOVE (s.value));
+      case symbol_kind::S_commands: // commands
+        value.move< std::vector<std::shared_ptr<Command>> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_declarations: // declarations
+        value.move< std::vector<std::shared_ptr<Declaration>> > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_procedures: // procedures
+        value.move< std::vector<std::shared_ptr<Procedure>> > (YY_MOVE (s.value));
         break;
 
       default:
@@ -2184,7 +2537,7 @@ switch (yykind)
 
 
 } // yy
-#line 2188 "parser.hpp"
+#line 2541 "parser.hpp"
 
 
 

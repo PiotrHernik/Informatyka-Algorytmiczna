@@ -77,95 +77,108 @@ yy::Parser::symbol_type yylex(yy::Scanner &scanner) {
 %token LBRACKET
 %token RBRACKET
 
-%token PLUS 
-%token MINUS
-%token MULT
-%token DIV
-%token MOD
+%nonassoc UMINUS
+%left PLUS MINUS
+%left MULT DIV MOD
   
 %token <long long> NUM
 %token <std::string> PIDENTIFIER
 
-%type <std::unique_ptr<Identifier>> identifier
-%type <std::unique_ptr<Value>> value
-%type <std::unique_ptr<Node>> command
+%type <std::shared_ptr<Identifier>> identifier
+%type <std::shared_ptr<Value>> value
+%type <std::shared_ptr<Condition>> condition
+%type <std::shared_ptr<Expression>> expression
+%type <std::vector<std::shared_ptr<Args>>> args
+%type <std::vector<std::shared_ptr<ArgsDeclaration>>> args_decl
+%type <std::vector<std::shared_ptr<Declaration>>> declarations
+%type <std::shared_ptr<ProcHead>> proc_head
+%type <std::shared_ptr<ProcCall>> proc_call
+%type <std::shared_ptr<Command>> command
+%type <std::vector<std::shared_ptr<Command>>> commands
+%type <std::vector<std::shared_ptr<Procedure>>> procedures
+%type <std::shared_ptr<Main>> main
+%type <long long> number
 
 %%
 program_all: 
-        procedures main
+        procedures main { mainProgram($1, std::move($2)); }
 
 procedures: 
-        procedures KW_PROCEDURE proc_head KW_IS declarations KW_BEGIN commands KW_END
-        | procedures KW_PROCEDURE proc_head KW_IS KW_BEGIN commands KW_END
-        | 
+        procedures KW_PROCEDURE proc_head KW_IS declarations KW_BEGIN commands KW_END { $$ = makeProcedures($1, std::move($3), $5, $7, ProcedureEnum::WITHDECLARATION); }
+        | procedures KW_PROCEDURE proc_head KW_IS KW_BEGIN commands KW_END { $$ = makeProcedures($1, std::move($3), $6, ProcedureEnum::WITHOUTDECLARATION); }
+        | { $$ = makeProcedures(); }
 
 
 main: 
-        KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END { std::cout << "KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END" << std::endl; }
-        | KW_PROGRAM KW_IS KW_BEGIN commands KW_END { std::cout << "KW_PROGRAM KW_IS KW_BEGIN commands KW_END" << std::endl; }
+        KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END { $$ = std::make_shared<MainWithDecl>($3, $5); }
+        | KW_PROGRAM KW_IS KW_BEGIN commands KW_END { $$ = std::make_shared<MainWithoutDecl>($4); }
 
 commands:
-        commands command { std::cout << "commands command" << std::endl; }
-        | command { std::cout << "command" << std::endl; }
+        commands command { $$ = makeCommands($1, std::move($2));  }
+        | command { $$ = makeCommands(std::move($1)); }
 
 command:
-        identifier ASSIGN expression SEMICOLON { std::cout << "identifier ASSIGN expression;" << std::endl; }
-        | KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF { std::cout << "KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF" << std::endl; }
-        | KW_IF condition KW_THEN commands KW_ENDIF { std::cout << "KW_IF condition KW_THEN commands KW_ENDIF" << std::endl; }
-        | KW_WHILE condition KW_DO commands KW_ENDWHILE { std::cout << "KW_WHILE condition KW_DO commands KW_ENDWHILE" << std::endl; }
-        | KW_REPEAT commands KW_UNTIL condition SEMICOLON { std::cout << "KW_REPEAT commands KW_UNTIL condition;" << std::endl; }
-        | KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR { std::cout << "KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR" << std::endl; }
-        | KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR { std::cout << "KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR" << std::endl; }
-        | proc_call SEMICOLON { std::cout << "proc_call;" << std::endl; }
-        | KW_READ identifier SEMICOLON { }
-        | KW_WRITE value SEMICOLON { std::cout << "KW_WRITE value;" << std::endl; }
+        identifier ASSIGN expression SEMICOLON { $$ = std::make_shared<CommandAssign>(std::move($1), std::move($3)); }
+        | KW_IF condition KW_THEN commands KW_ENDIF { $$ = std::make_shared<CommandIf>(std::move($2), $4); }
+        | KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF { $$ = std::make_shared<CommandIfElse>(std::move($2), $4, $6); }
+        | KW_WHILE condition KW_DO commands KW_ENDWHILE { $$ = std::make_shared<CommandWhile>(std::move($2), $4); }
+        | KW_REPEAT commands KW_UNTIL condition SEMICOLON { $$ = std::make_shared<CommandRepeat>($2, std::move($4)); }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR { $$ = std::make_shared<CommandForTo>($2, std::move($4), std::move($6), $8); }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR { $$ = std::make_shared<CommandDownTo>($2, std::move($4), std::move($6), $8); }
+        | proc_call SEMICOLON { $$ = std::make_shared<CommandProcCall>(std::move($1)); }
+        | KW_READ identifier SEMICOLON { $$ = std::make_shared<CommandRead>(std::move($2)); }
+        | KW_WRITE value SEMICOLON { $$ = std::make_shared<CommandWrite>(std::move($2)); }
 
 proc_head:
-        PIDENTIFIER LPRNT args_decl RPRNT { std::cout << "PIDENTIFIER(args_decl)" << std::endl; }
+        PIDENTIFIER LPRNT args_decl RPRNT { $$ = makeProcHead($1, $3); }
 
 proc_call:
-        PIDENTIFIER LPRNT args RPRNT { std::cout << "PIDENTIFIER(args)" << std::endl; }
+        PIDENTIFIER LPRNT args RPRNT { $$ = makeProcCall($1, $3); }
 
 declarations:
-        declarations COMMA PIDENTIFIER { std::cout << "declarations, PIDENTIFIER" << std::endl; }
-        | declarations COMMA PIDENTIFIER LBRACKET NUM COLON NUM RBRACKET { std::cout << "declarations, PIDENTIFIER[NUM:NUM]" << std::endl; }
-        | PIDENTIFIER { std::cout << "pidentifier1" << std::endl; }
-        | PIDENTIFIER LBRACKET NUM COLON NUM RBRACKET { std::cout << "PIDENTIFIER[NUM:NUM]" << std::endl; }
+        declarations COMMA PIDENTIFIER { $$ = makeDeclaration($1, $3, {}); }
+        | declarations COMMA PIDENTIFIER LBRACKET number COLON number RBRACKET { $$ = makeDeclaration($1, $3, {$5, $7}); }
+        | PIDENTIFIER { $$ = makeDeclaration($1, {}); }
+        | PIDENTIFIER LBRACKET number COLON number RBRACKET { $$ = makeDeclaration($1, {$3, $5}); }
 
 args_decl:
-        args_decl COMMA PIDENTIFIER { std::cout << "args_decl, PIDENTIFIER" << std::endl; }
-        | args_decl COMMA KW_T PIDENTIFIER { std::cout << "args_decl, T PIDENTIFIER" << std::endl; }
-        | PIDENTIFIER { std::cout << "pidentifier2" << std::endl; }
-        | KW_T PIDENTIFIER { std::cout << "T PIDENTIFIER" << std::endl; }
+        args_decl COMMA PIDENTIFIER { $$ = makeArgsDeclaration($1, $3, ArgsDeclarationEnum::PID); }
+        | args_decl COMMA KW_T PIDENTIFIER { $$ = makeArgsDeclaration($1, $4, ArgsDeclarationEnum::TABLE); }
+        | PIDENTIFIER { $$ = makeArgsDeclaration($1, ArgsDeclarationEnum::PID); }
+        | KW_T PIDENTIFIER { $$ = makeArgsDeclaration($2, ArgsDeclarationEnum::TABLE); }
 
 args:
-        args COMMA PIDENTIFIER { std::cout << "args, PIDENTIFIER" << std::endl; }
-        | PIDENTIFIER { std::cout << "pidentifier3" << std::endl; }
+        args COMMA PIDENTIFIER { $$ = makeArgs($1, $3); }
+        | PIDENTIFIER { $$ = makeArgs($1); }
 
 expression:
-        value { std::cout << "value" << std::endl; }
-        | value PLUS value { std::cout << "value + value" << std::endl; }
-        | value MINUS value { std::cout << "value - value" << std::endl; }
-        | value MULT value { std::cout << "value * value" << std::endl; }
-        | value DIV value { std::cout << "value / value" << std::endl; }
-        | value MOD value { std::cout << "value % value" << std::endl; }
+        value { $$ = std::make_shared<Expression>(std::move($1), ExpressionEnum::VALUE); }
+        | value PLUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::PLUS); }
+        | value MINUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MINUS); }
+        | value MULT value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MULT); }
+        | value DIV value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::DIV); }
+        | value MOD value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MOD); }
 
 condition:
-        value EQUAL value { std::cout << "value == value" << std::endl; }
-        | value NEQUAL value { std::cout << "value != value" << std::endl; }
-        | value MORE value { std::cout << "value > value" << std::endl; }
-        | value LESS value { std::cout << "value < value" << std::endl; }
-        | value MOREOREQUAL value { std::cout << "value >= value" << std::endl; }
-        | value LESSOREQUAL value { std::cout << "value <= value" << std::endl; }
+        value EQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::EQUAL); }
+        | value NEQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::NOTEQUAL); }
+        | value MORE value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::MORE); }
+        | value LESS value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::LESS); }
+        | value MOREOREQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::MOREOREQUAL); }
+        | value LESSOREQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::LESSOREQUAL); }
 
 value:
-        NUM { $$ = std::make_unique<Value>($1, ValueEnum::NUM); }
-        | identifier { $$ = std::make_unique<Value>(std::move($1), ValueEnum::ID); }
+        number { $$ = std::make_shared<Value>($1, ValueEnum::NUM); }
+        | identifier { $$ = std::make_shared<Value>(std::move($1), ValueEnum::ID); }
+
+number:
+        NUM { $$ = $1; }
+        | MINUS NUM %prec UMINUS { $$ = -$2; }
 
 identifier:
-        PIDENTIFIER { $$ = std::make_unique<Identifier>($1, IdentifierEnum::PID); }
-        | PIDENTIFIER LBRACKET PIDENTIFIER RBRACKET {  $$ = std::make_unique<Identifier>($1, $3, IdentifierEnum::PIDTPID); }
-        | PIDENTIFIER LBRACKET NUM RBRACKET {  $$ = std::make_unique<Identifier>($1, $3, IdentifierEnum::PIDT); }
+        PIDENTIFIER { $$ = std::make_shared<Identifier>($1, IdentifierEnum::PID); }
+        | PIDENTIFIER LBRACKET number RBRACKET {  $$ = std::make_shared<Identifier>($1, $3, IdentifierEnum::PIDT); }
+        | PIDENTIFIER LBRACKET PIDENTIFIER RBRACKET {  $$ = std::make_shared<Identifier>($1, $3, IdentifierEnum::PIDTPID); }
 
 
 %%

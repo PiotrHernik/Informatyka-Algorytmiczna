@@ -214,8 +214,27 @@ extern int yyleng;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
     
-    #define YY_LESS_LINENO(n)
-    #define YY_LINENO_REWIND_TO(ptr)
+    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
+     *       access to the local variable yy_act. Since yyless() is a macro, it would break
+     *       existing scanners that call yyless() from OUTSIDE yylex.
+     *       One obvious solution it to make yy_act a global. I tried that, and saw
+     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
+     *       normally declared as a register variable-- so it is not worth it.
+     */
+    #define  YY_LESS_LINENO(n) \
+            do { \
+                int yyl;\
+                for ( yyl = n; yyl < yyleng; ++yyl )\
+                    if ( yytext[yyl] == '\n' )\
+                        --yylineno;\
+            }while(0)
+    #define YY_LINENO_REWIND_TO(dst) \
+            do {\
+                const char *p;\
+                for ( p = yy_cp-1; p >= (dst); --p)\
+                    if ( *p == '\n' )\
+                        --yylineno;\
+            }while(0)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -539,13 +558,20 @@ static const flex_int16_t yy_chk[162] =
       110
     } ;
 
+/* Table of booleans, true if rule could match eol. */
+static const flex_int32_t yy_rule_can_match_eol[49] =
+    {   0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 1, 0, 0, 0, 0,     };
+
 static const flex_int16_t yy_rule_linenum[48] =
     {   0,
-       27,   28,   29,   30,   31,   32,   33,   34,   35,   36,
-       37,   38,   39,   40,   41,   42,   43,   44,   45,   46,
-       47,   48,   49,   50,   51,   52,   53,   54,   55,   56,
-       57,   58,   59,   60,   61,   62,   63,   64,   65,   66,
-       67,   68,   69,   70,   71,   72,   74
+       28,   29,   30,   31,   32,   33,   34,   35,   36,   37,
+       38,   39,   40,   41,   42,   43,   44,   45,   46,   47,
+       48,   49,   50,   51,   52,   53,   54,   55,   56,   57,
+       58,   59,   60,   61,   62,   63,   64,   65,   66,   67,
+       68,   69,   70,   76,   77,   78,   80
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -558,15 +584,15 @@ static const flex_int16_t yy_rule_linenum[48] =
 #line 1 "scanner.lpp"
 #define YY_NO_INPUT 1
 
-#line 11 "scanner.lpp"
+#line 12 "scanner.lpp"
 #include "scanner.hpp"
 #include "parser.hpp"
 
 
 // Code run each time a pattern is matched.
 #define YY_USER_ACTION  loc.columns(YYLeng());
-#line 569 "scanner.cpp"
-#line 570 "scanner.cpp"
+#line 595 "scanner.cpp"
+#line 596 "scanner.cpp"
 
 #define INITIAL 0
 
@@ -758,15 +784,15 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 20 "scanner.lpp"
+#line 21 "scanner.lpp"
 
 
 
-#line 24 "scanner.lpp"
+#line 25 "scanner.lpp"
     loc.step();
 
 
-#line 770 "scanner.cpp"
+#line 796 "scanner.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -817,6 +843,16 @@ yy_find_action:
 
 /* %% [11.0] code for yylineno update goes here */
 
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			int yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					
+    yylineno++;
+;
+			}
+
 do_action:	/* This label is used only to access EOF actions. */
 
 /* %% [12.0] debug code goes here */
@@ -847,250 +883,255 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "scanner.lpp"
+#line 28 "scanner.lpp"
 { return yy::Parser::make_KW_PROGRAM(loc); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "scanner.lpp"
+#line 29 "scanner.lpp"
 { return yy::Parser::make_KW_PROCEDURE(loc); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 29 "scanner.lpp"
+#line 30 "scanner.lpp"
 { return yy::Parser::make_KW_BEGIN(loc); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 30 "scanner.lpp"
+#line 31 "scanner.lpp"
 { return yy::Parser::make_KW_END(loc); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 31 "scanner.lpp"
+#line 32 "scanner.lpp"
 { return yy::Parser::make_KW_IS(loc); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 32 "scanner.lpp"
+#line 33 "scanner.lpp"
 { return yy::Parser::make_KW_IF(loc); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "scanner.lpp"
+#line 34 "scanner.lpp"
 { return yy::Parser::make_KW_THEN(loc); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "scanner.lpp"
+#line 35 "scanner.lpp"
 { return yy::Parser::make_KW_ELSE(loc); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 35 "scanner.lpp"
+#line 36 "scanner.lpp"
 { return yy::Parser::make_KW_ENDIF(loc); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 36 "scanner.lpp"
+#line 37 "scanner.lpp"
 { return yy::Parser::make_KW_WHILE(loc); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 37 "scanner.lpp"
+#line 38 "scanner.lpp"
 { return yy::Parser::make_KW_DO(loc); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "scanner.lpp"
+#line 39 "scanner.lpp"
 { return yy::Parser::make_KW_ENDWHILE(loc); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "scanner.lpp"
+#line 40 "scanner.lpp"
 { return yy::Parser::make_KW_REPEAT(loc); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "scanner.lpp"
+#line 41 "scanner.lpp"
 { return yy::Parser::make_KW_UNTIL(loc); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "scanner.lpp"
+#line 42 "scanner.lpp"
 { return yy::Parser::make_KW_FOR(loc); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "scanner.lpp"
+#line 43 "scanner.lpp"
 { return yy::Parser::make_KW_FROM(loc); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "scanner.lpp"
+#line 44 "scanner.lpp"
 { return yy::Parser::make_KW_TO(loc); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "scanner.lpp"
+#line 45 "scanner.lpp"
 { return yy::Parser::make_KW_ENDFOR(loc); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "scanner.lpp"
+#line 46 "scanner.lpp"
 { return yy::Parser::make_KW_DOWNTO(loc); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "scanner.lpp"
+#line 47 "scanner.lpp"
 { return yy::Parser::make_KW_READ(loc); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "scanner.lpp"
+#line 48 "scanner.lpp"
 { return yy::Parser::make_KW_WRITE(loc); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "scanner.lpp"
+#line 49 "scanner.lpp"
 { return yy::Parser::make_KW_T(loc); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "scanner.lpp"
+#line 50 "scanner.lpp"
 { return yy::Parser::make_PLUS(loc); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "scanner.lpp"
+#line 51 "scanner.lpp"
 { return yy::Parser::make_MINUS(loc); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 51 "scanner.lpp"
+#line 52 "scanner.lpp"
 { return yy::Parser::make_MULT(loc); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "scanner.lpp"
+#line 53 "scanner.lpp"
 { return yy::Parser::make_DIV(loc); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 53 "scanner.lpp"
+#line 54 "scanner.lpp"
 { return yy::Parser::make_MOD(loc); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "scanner.lpp"
+#line 55 "scanner.lpp"
 { return yy::Parser::make_ASSIGN(loc); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 55 "scanner.lpp"
+#line 56 "scanner.lpp"
 { return yy::Parser::make_EQUAL(loc); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 56 "scanner.lpp"
+#line 57 "scanner.lpp"
 { return yy::Parser::make_NEQUAL(loc); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 57 "scanner.lpp"
+#line 58 "scanner.lpp"
 { return yy::Parser::make_MORE(loc); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 58 "scanner.lpp"
+#line 59 "scanner.lpp"
 { return yy::Parser::make_LESS(loc); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 59 "scanner.lpp"
+#line 60 "scanner.lpp"
 { return yy::Parser::make_MOREOREQUAL(loc); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 60 "scanner.lpp"
+#line 61 "scanner.lpp"
 { return yy::Parser::make_LESSOREQUAL(loc); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 61 "scanner.lpp"
+#line 62 "scanner.lpp"
 { return yy::Parser::make_LPRNT(loc); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 62 "scanner.lpp"
+#line 63 "scanner.lpp"
 { return yy::Parser::make_RPRNT(loc); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 63 "scanner.lpp"
+#line 64 "scanner.lpp"
 { return yy::Parser::make_LBRACKET(loc); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 64 "scanner.lpp"
+#line 65 "scanner.lpp"
 { return yy::Parser::make_RBRACKET(loc); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 65 "scanner.lpp"
+#line 66 "scanner.lpp"
 { return yy::Parser::make_COMMA(loc); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 66 "scanner.lpp"
+#line 67 "scanner.lpp"
 { return yy::Parser::make_COLON(loc); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 67 "scanner.lpp"
+#line 68 "scanner.lpp"
 { return yy::Parser::make_SEMICOLON(loc); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 68 "scanner.lpp"
+#line 69 "scanner.lpp"
 { return yy::Parser::make_PIDENTIFIER(YYText(), loc); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 69 "scanner.lpp"
-{ return yy::Parser::make_NUM(std::atoll(YYText()), loc); }
+#line 70 "scanner.lpp"
+{ try {
+                            return yy::Parser::make_NUM(std::stoll(YYText()), loc); 
+                            }
+                        catch(const std::out_of_range&){
+                            std::cerr << "Number out of range for long long " <<  yylineno  << std::endl;
+                        }}
 	YY_BREAK
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 70 "scanner.lpp"
+#line 76 "scanner.lpp"
 { }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 71 "scanner.lpp"
+#line 77 "scanner.lpp"
 // Ignoruj komentarze lub nowe linie
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 72 "scanner.lpp"
+#line 78 "scanner.lpp"
 { loc.step(); } // Ignoruj białe znaki
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 73 "scanner.lpp"
+#line 79 "scanner.lpp"
 { return yy::Parser::make_YYEOF(loc); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 74 "scanner.lpp"
+#line 80 "scanner.lpp"
 { loc.step(); } // Ignoruj inne znaki
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 77 "scanner.lpp"
+#line 83 "scanner.lpp"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1094 "scanner.cpp"
+#line 1135 "scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1608,6 +1649,10 @@ int yyFlexLexer::yy_get_next_buffer()
 
 /* %% [18.0] update yylineno here */
 
+    if ( c == '\n' ){
+        --yylineno;
+    }
+
 	(yytext_ptr) = yy_bp;
 	(yy_hold_char) = *yy_cp;
 	(yy_c_buf_p) = yy_cp;
@@ -1685,6 +1730,10 @@ int yyFlexLexer::yy_get_next_buffer()
 	(yy_hold_char) = *++(yy_c_buf_p);
 
 /* %% [19.0] update BOL and yylineno */
+	if ( c == '\n' )
+		
+    yylineno++;
+;
 
 	return c;
 }
@@ -2206,6 +2255,6 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 77 "scanner.lpp"
+#line 83 "scanner.lpp"
 
 
