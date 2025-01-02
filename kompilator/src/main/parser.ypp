@@ -1,0 +1,189 @@
+%require "3.2"
+%language "c++"
+
+%define api.parser.class {Parser}
+%define api.value.type variant
+%define api.token.raw
+%define api.token.constructor
+
+%define parse.assert
+%define parse.trace
+%define parse.error detailed
+%define parse.lac full
+
+%locations
+
+%param {yy::Scanner &scanner}
+
+%code requires
+{
+
+#include "../includs.hpp"
+#include <string>
+#include <memory>
+
+namespace yy {
+    class Scanner;
+}
+}
+
+%code {
+#include "scanner.hpp"
+
+
+yy::Parser::symbol_type yylex(yy::Scanner &scanner) {
+    return scanner.scan();
+}
+}
+
+%token KW_IF 
+%token KW_ELSE
+%token NEWLINE
+%token KW_PROCEDURE 
+%token KW_IS 
+%token KW_BEGIN 
+%token KW_END
+%token KW_PROGRAM
+%token KW_THEN
+%token KW_ENDIF
+%token KW_WHILE 
+%token KW_DO
+%token KW_ENDWHILE
+%token KW_REPEAT
+%token KW_UNTIL
+%token KW_FOR
+%token KW_FROM
+%token KW_ENDFOR
+%token KW_DOWNTO
+%token KW_READ
+%token KW_WRITE
+%token KW_TO
+%token KW_T
+
+%token EQUAL
+%token NEQUAL
+%token LESS
+%token MORE
+%token LESSOREQUAL
+%token MOREOREQUAL
+
+%token ASSIGN
+
+%token SEMICOLON
+%token COLON
+%token COMMA
+%token LPRNT
+%token RPRNT
+%token LBRACKET
+%token RBRACKET
+
+%nonassoc UMINUS
+%left PLUS MINUS
+%left MULT DIV MOD
+  
+%token <long long> NUM
+%token <std::string> PIDENTIFIER
+
+%type <std::shared_ptr<Identifier>> identifier
+%type <std::shared_ptr<Value>> value
+%type <std::shared_ptr<Condition>> condition
+%type <std::shared_ptr<Expression>> expression
+%type <std::vector<std::shared_ptr<Args>>> args
+%type <std::vector<std::shared_ptr<ArgsDeclaration>>> args_decl
+%type <std::vector<std::shared_ptr<Declaration>>> declarations
+%type <std::shared_ptr<ProcHead>> proc_head
+%type <std::shared_ptr<ProcCall>> proc_call
+%type <std::shared_ptr<Command>> command
+%type <std::vector<std::shared_ptr<Command>>> commands
+%type <std::vector<std::shared_ptr<Procedure>>> procedures
+%type <std::shared_ptr<Main>> main
+%type <long long> number
+
+%%
+program_all: 
+        procedures main { mainProgram($1, std::move($2)); }
+
+procedures: 
+        procedures KW_PROCEDURE proc_head KW_IS declarations KW_BEGIN commands KW_END { $$ = makeProcedures($1, std::move($3), $5, $7, ProcedureEnum::WITHDECLARATION);}
+        | procedures KW_PROCEDURE proc_head KW_IS KW_BEGIN commands KW_END { $$ = makeProcedures($1, std::move($3), $6, ProcedureEnum::WITHOUTDECLARATION); }
+        | { $$ = makeProcedures(); }
+
+
+main: 
+        KW_PROGRAM KW_IS declarations KW_BEGIN commands KW_END { $$ = std::make_shared<MainWithDecl>($3, $5); }
+        | KW_PROGRAM KW_IS KW_BEGIN commands KW_END { $$ = std::make_shared<MainWithoutDecl>($4); }
+
+commands:
+        commands command { $$ = makeCommands($1, std::move($2));  }
+        | command { $$ = makeCommands(std::move($1)); }
+
+command:
+        identifier ASSIGN expression SEMICOLON { $$ = std::make_shared<CommandAssign>(std::move($1), std::move($3)); }
+        | KW_IF condition KW_THEN commands KW_ENDIF { $$ = std::make_shared<CommandIf>(std::move($2), $4); }
+        | KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF { $$ = std::make_shared<CommandIfElse>(std::move($2), $4, $6); }
+        | KW_WHILE condition KW_DO commands KW_ENDWHILE { $$ = std::make_shared<CommandWhile>(std::move($2), $4); }
+        | KW_REPEAT commands KW_UNTIL condition SEMICOLON { $$ = std::make_shared<CommandRepeat>($2, std::move($4)); }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR { $$ = std::make_shared<CommandForTo>($2, std::move($4), std::move($6), $8); }
+        | KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR { $$ = std::make_shared<CommandDownTo>($2, std::move($4), std::move($6), $8); }
+        | proc_call SEMICOLON { $$ = std::make_shared<CommandProcCall>(std::move($1)); }
+        | KW_READ identifier SEMICOLON { $$ = std::make_shared<CommandRead>(std::move($2)); }
+        | KW_WRITE value SEMICOLON { $$ = std::make_shared<CommandWrite>(std::move($2)); }
+
+proc_head:
+        PIDENTIFIER LPRNT args_decl RPRNT { $$ = makeProcHead($1, $3); }
+
+proc_call:
+        PIDENTIFIER LPRNT args RPRNT { $$ = makeProcCall($1, $3); }
+
+declarations:
+        declarations COMMA PIDENTIFIER { $$ = makeDeclaration($1, $3, {}); }
+        | declarations COMMA PIDENTIFIER LBRACKET number COLON number RBRACKET { $$ = makeDeclaration($1, $3, {$5, $7}); }
+        | PIDENTIFIER { $$ = makeDeclaration($1, {}); }
+        | PIDENTIFIER LBRACKET number COLON number RBRACKET { $$ = makeDeclaration($1, {$3, $5}); }
+
+args_decl:
+        args_decl COMMA PIDENTIFIER { $$ = makeArgsDeclaration($1, $3, ArgsDeclarationEnum::PID); }
+        | args_decl COMMA KW_T PIDENTIFIER { $$ = makeArgsDeclaration($1, $4, ArgsDeclarationEnum::TABLE); }
+        | PIDENTIFIER { $$ = makeArgsDeclaration($1, ArgsDeclarationEnum::PID); }
+        | KW_T PIDENTIFIER { $$ = makeArgsDeclaration($2, ArgsDeclarationEnum::TABLE); }
+
+args:
+        args COMMA PIDENTIFIER { $$ = makeArgs($1, $3); }
+        | PIDENTIFIER { $$ = makeArgs($1); }
+
+expression:
+        value { $$ = std::make_shared<Expression>(std::move($1), ExpressionEnum::VALUE); }
+        | value PLUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::PLUS); }
+        | value MINUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MINUS); }
+        | value MULT value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MULT); }
+        | value DIV value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::DIV); }
+        | value MOD value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MOD); }
+
+condition:
+        value EQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::EQUAL); }
+        | value NEQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::NOTEQUAL); }
+        | value MORE value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::MORE); }
+        | value LESS value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::LESS); }
+        | value MOREOREQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::MOREOREQUAL); }
+        | value LESSOREQUAL value { $$ = std::make_shared<Condition>(std::move($1), std::move($3), ConditionEnum::LESSOREQUAL); }
+
+value:
+        number { $$ = std::make_shared<Value>($1, ValueEnum::NUM); }
+        | identifier { $$ = std::make_shared<Value>(std::move($1), ValueEnum::ID); }
+
+number:
+        NUM { $$ = $1; }
+        | MINUS NUM %prec UMINUS { $$ = -$2; }
+
+identifier:
+        PIDENTIFIER { $$ = std::make_shared<Identifier>($1, IdentifierEnum::PID); }
+        | PIDENTIFIER LBRACKET number RBRACKET {  $$ = std::make_shared<Identifier>($1, $3, IdentifierEnum::PIDT); }
+        | PIDENTIFIER LBRACKET PIDENTIFIER RBRACKET {  $$ = std::make_shared<Identifier>($1, $3, IdentifierEnum::PIDTPID); }
+
+
+%%
+
+void yy::Parser::error(const location_type& loc, const std::string& msg)
+{
+    std::cout << "ERROR at "<< loc << ", message: " << msg << std::endl;
+}

@@ -1,0 +1,11 @@
+PROGRAM IS
+    a, b, c[-2:10]
+BEGIN
+a := 3;
+c[a] := 10;
+FOR i FROM 10 DOWNTO 0
+DO
+c[i] := i + a;
+WRITE c[i];
+ENDFOR
+END

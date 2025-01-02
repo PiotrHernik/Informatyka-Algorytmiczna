@@ -8,6 +8,9 @@
 
 #include "SymbolTable.hpp"
 
+struct CommandIf;
+struct CommandIfElse;
+
 struct Node
 {
     virtual ~Node() = default;
@@ -206,10 +209,13 @@ struct CommandAssign : Command
 struct CommandCondition : Command
 {
 protected:
-    std::vector<std::string> makeAsmValue1(SymbolTable&);
-    std::vector<std::string> makeAsmValue2(SymbolTable&);
+    std::vector<std::string> makeAsmValue1(SymbolTable&) const;
+    std::vector<std::string> makeAsmValue2(SymbolTable&) const;
 
     std::shared_ptr<Condition> condition;
+
+    friend std::vector<std::string> executeIfCommand(SymbolTable&, const CommandIf&, std::vector<std::shared_ptr<Procedure>>&);
+    friend std::vector<std::string> executeIfElseCommand(SymbolTable&, const CommandIfElse&, std::vector<std::shared_ptr<Procedure>>&);
 };
 
 struct CommandIfElse : CommandCondition

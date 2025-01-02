@@ -1,0 +1,13 @@
+PROGRAM IS
+    a, b, c[-2:10]
+BEGIN
+    a := 5;
+    b := 6;
+    IF a != b THEN
+      a := 7;
+    ELSE
+      IF a > b THEN
+      a := 6;
+      ENDIF
+    ENDIF
+END

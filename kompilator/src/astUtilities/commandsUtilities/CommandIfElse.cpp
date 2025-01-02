@@ -1,25 +1,33 @@
-#include "IfCommand.hpp"
+#include "CommandIfElse.hpp"
 
-std::vector<std::string> executeIfCommand(SymbolTable& symbolTable, 
-                                        std::vector<std::shared_ptr<Command>>& commands, 
-                                        std::vector<std::shared_ptr<Procedure>>& procedures)
+
+std::vector<std::string> executeIfElseCommand(SymbolTable& symbolTable, const CommandIfElse& commandIfElse, std::vector<std::shared_ptr<Procedure>>& procedures, bool isInFor)
 {
     std::vector<std::string> asmCommands;
     std::vector<std::string> asmCommandsIF;
+    std::vector<std::string> asmCommandsElse;
 
-    for (auto& command : commands)
+    for (auto& command : commandIfElse.commands2)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, isInFor);
+        asmCommandsElse.insert(asmCommandsElse.end(), tempVec.begin(), tempVec.end());
+    }
+    auto amountElseCommands = asmCommandsElse.size();
+
+    for (auto& command : commandIfElse.commands1)
     {
         auto tempVec = command->executeCommand(symbolTable, procedures);
         asmCommandsIF.insert(asmCommandsIF.end(), tempVec.begin(), tempVec.end());
     }
+    asmCommandsIF.push_back("    JUMP " + std::to_string(amountElseCommands + 1));
     auto amountIfCommands = asmCommandsIF.size();
 
-    auto tempVec2 = makeAsmValue2(symbolTable);
-    auto tempVec1 = makeAsmValue1(symbolTable);
+    auto tempVec2 = commandIfElse.makeAsmValue2(symbolTable, isInFor);
+    auto tempVec1 = commandIfElse.makeAsmValue1(symbolTable, isInFor);
     asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
-    auto condEnum = condition->condEnum;
+    auto condEnum = commandIfElse.condition->condEnum;
     switch (condEnum)
     {
     case ConditionEnum::EQUAL:
@@ -38,6 +46,7 @@ std::vector<std::string> executeIfCommand(SymbolTable& symbolTable,
         asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
         break;
     case ConditionEnum::LESS:
+        asmCommands.push_back("    SUB 10");
         asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
         asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
         break;
@@ -55,6 +64,7 @@ std::vector<std::string> executeIfCommand(SymbolTable& symbolTable,
     }
 
     asmCommands.insert(asmCommands.end(), asmCommandsIF.begin(), asmCommandsIF.end());
+    asmCommands.insert(asmCommands.end(), asmCommandsElse.begin(), asmCommandsElse.end());
 
 
     return asmCommands;

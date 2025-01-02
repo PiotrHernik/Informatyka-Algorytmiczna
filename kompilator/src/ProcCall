@@ -1,0 +1,24 @@
+
+
+PROCEDURE abc(a, b, T c) IS
+BEGIN
+WRITE 2;
+END
+
+PROCEDURE gcd(a, b, T c) IS
+e,f,g[2:10]
+BEGIN
+WRITE a;
+WRITE b;
+WRITE c[a];
+abc(a,b,c);
+END
+
+PROGRAM IS
+x, y, z[-2:10]
+BEGIN
+x:= 2;
+y := 3;
+z[x] := 4;
+gcd(x,y,z);
+END

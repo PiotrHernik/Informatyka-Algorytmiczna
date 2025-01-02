@@ -2,7 +2,7 @@
 TARGET = compiler
 
 # Pliki źródłowe
-SRC = main.cpp parser.cpp scanner.cpp ast.cpp SymbolTable.cpp functions/validIdentifier.cpp
+SRC = main.cpp parser.cpp scanner.cpp ast.cpp SymbolTable.cpp functions/validIdentifier.cpp Commands/CommandIf.cpp Commands/CommandIfElse.cpp
 
 # Kompilator i flagi
 CXX = g++
