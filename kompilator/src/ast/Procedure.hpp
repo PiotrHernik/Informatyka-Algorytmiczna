@@ -24,10 +24,13 @@ struct Procedure : Node
     std::string doAsm() const override;
     void fillSymbolTable();
     void fillArgsAddress(SymbolTable&, std::shared_ptr<ProcCall>);
+    std::vector<std::string> executeCommand(std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int);
+    int countAsmCommand(std::vector<std::shared_ptr<Procedure>>&);
 
     std::shared_ptr<ProcHead> procHead;
     std::vector<std::shared_ptr<Declaration>> declarations;
     std::vector<std::shared_ptr<Command>> commands;
     ProcedureEnum procEnum;
     SymbolTable symbolTable;
+    long long rntrAddress;
 };

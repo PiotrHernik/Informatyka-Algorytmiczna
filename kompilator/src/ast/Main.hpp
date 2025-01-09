@@ -15,6 +15,7 @@ struct Main : Node{
     virtual ~Main() = default;
     virtual void fillSymbolTable() = 0;
     virtual void executeCommand(std::vector<std::shared_ptr<Procedure>>&) = 0;
+    bool areMuliplyProcedure(std::vector<std::shared_ptr<Procedure>>&);
     std::vector<std::shared_ptr<Command>> commands;
     SymbolTable symbolTable;
 };

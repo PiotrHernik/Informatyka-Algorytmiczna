@@ -1,0 +1,19 @@
+PROGRAM IS
+    x, y
+BEGIN
+    x := 0;
+    y := 1000000000000000;
+
+    REPEAT
+        x := x + y;
+        WRITE x;
+    UNTIL 3 < 0;
+
+    WHILE 1 = 1 DO
+        x := 1 + x;
+    ENDWHILE
+
+    WHILE x = x DO
+        x := 1 + 777;
+    ENDWHILE
+END

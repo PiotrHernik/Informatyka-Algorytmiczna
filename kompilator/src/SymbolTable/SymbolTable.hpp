@@ -38,7 +38,9 @@ public:
     long long getPidAddress(std::string, bool = false);
     long long getTableAddress(std::string, long long);
     long long getTableAddress(std::string);
-    void addArgsAddress(std::string& argument, long long address, ArgsDeclarationEnum);
+    long long getFirstFreeAddress();
+    void increaseFirstFreeAddress();
+    void addArgsAddress(std::string&, long long, ArgsDeclarationEnum);
     void setOutputFile(const char* outputFile);
 
     std::string getMembership();

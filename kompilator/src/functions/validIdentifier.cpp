@@ -5,6 +5,11 @@ bool isValidIdentifier(SymbolTable& symbolTable, std::shared_ptr<Identifier> ide
     auto idEnum = identifier->idEnum;
     if (idEnum == IdentifierEnum::PID)
     {
+        if (symbolTable.isIterator(identifier->name1))
+        {
+            return false;
+        }
+        
         if (!symbolTable.isDeclared(identifier->name1, DeclarationEnum::PID) 
         && !symbolTable.isArgument(identifier->name1, DeclarationEnum::PID))
         {

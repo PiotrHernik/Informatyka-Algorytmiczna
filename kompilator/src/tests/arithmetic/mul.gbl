@@ -1,0 +1,17 @@
+# in =; out = 70077626, -70077626, -70077626, 70077626
+PROGRAM IS
+    x, y, z, x_, y_
+BEGIN
+    x := 56789;
+    y := 1234;
+    x_ := -56789;
+    y_ := -1234;
+    z := x * y;
+    WRITE z;
+    z := x_ * y;
+    WRITE z;
+    z := x * y_;
+    WRITE z;
+    z := x_ * y_;
+    WRITE z;
+END

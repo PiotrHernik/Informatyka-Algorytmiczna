@@ -8,6 +8,7 @@
 CommandAssign::CommandAssign(std::shared_ptr<Identifier> id, std::shared_ptr<Expression> expr)
     : identifier(std::move(id)), expression(std::move(expr))
 {
+    commandEnum = CommandEnum::ASSIGN;
 }
 
 std::string CommandAssign::doAsm() const
@@ -20,6 +21,7 @@ CommandIfElse::CommandIfElse(std::shared_ptr<Condition> cond, std::vector<std::s
     : commands1(std::move(com1)), commands2(std::move(com2))
 {
     condition = cond;
+    commandEnum = CommandEnum::IFELSE;
 }
 
 std::string CommandIfElse::doAsm() const
@@ -31,6 +33,7 @@ CommandIf::CommandIf(std::shared_ptr<Condition> cond, std::vector<std::shared_pt
     : commands(std::move(commands))
 {
     condition = cond;
+    commandEnum = CommandEnum::IF;
 }
 
 std::string CommandIf::doAsm() const
@@ -43,6 +46,7 @@ CommandWhile::CommandWhile(std::shared_ptr<Condition> cond, std::vector<std::sha
     : commands(std::move(commands))
 {
     condition = cond;
+    commandEnum = CommandEnum::WHILE;
 }
 
 std::string CommandWhile::doAsm() const
@@ -55,6 +59,7 @@ CommandRepeat::CommandRepeat(std::vector<std::shared_ptr<Command>> commands, std
     : commands(std::move(commands))
 {
     condition = cond;
+    commandEnum = CommandEnum::REPEAT;
 }
 
 std::string CommandRepeat::doAsm() const
@@ -66,6 +71,7 @@ std::string CommandRepeat::doAsm() const
 CommandForTo::CommandForTo(std::string pid, std::shared_ptr<Value> val1, std::shared_ptr<Value> val2, std::vector<std::shared_ptr<Command>> commands)
     : pid(pid), value1(std::move(val1)), value2(std::move(val2)), commands(std::move(commands))
 {
+    commandEnum = CommandEnum::FORTO;
 }
 
 std::string CommandForTo::doAsm() const
@@ -76,6 +82,7 @@ std::string CommandForTo::doAsm() const
 CommandDownTo::CommandDownTo(std::string pid, std::shared_ptr<Value> val1, std::shared_ptr<Value> val2, std::vector<std::shared_ptr<Command>> commands)
     : pid(pid), value1(std::move(val1)), value2(std::move(val2)), commands(std::move(commands))
 {
+    commandEnum = CommandEnum::FORDOWNTO;
 }
 
 
@@ -87,6 +94,7 @@ std::string CommandDownTo::doAsm() const
 CommandProcCall::CommandProcCall(std::shared_ptr<ProcCall> procCall)
     : procCall(std::move(procCall))
 {
+    commandEnum = CommandEnum::PROCCALL;
 }
 
 std::string CommandProcCall::doAsm() const
@@ -97,6 +105,7 @@ std::string CommandProcCall::doAsm() const
 CommandRead::CommandRead(std::shared_ptr<Identifier> id)
     : identifier(std::move(id))
 {
+    commandEnum = CommandEnum::READ;
 }
 
 std::string CommandRead::doAsm() const
@@ -108,6 +117,7 @@ std::string CommandRead::doAsm() const
 CommandWrite::CommandWrite(std::shared_ptr<Value> val)
     : value(std::move(val))
 {
+    commandEnum = CommandEnum::WRITE;
 }
 
 std::string CommandWrite::doAsm() const
@@ -118,6 +128,8 @@ std::string CommandWrite::doAsm() const
 
 std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
         bool isInFor)
 {
     std::vector<std::string> asmCommands;
@@ -225,30 +237,13 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
 }
 
 std::vector<std::string> CommandIf::executeCommand(SymbolTable& symbolTable, 
-        std::vector<std::shared_ptr<Procedure>>& procedures, 
-        bool isInFor)
-{
-    return executeIfCommand(symbolTable, *this, procedures, isInFor);
-}
-std::vector<std::string> CommandIfElse::executeCommand(SymbolTable& symbolTable, 
-        std::vector<std::shared_ptr<Procedure>>& procedures, 
-        bool isInFor)
-{
-    return executeIfElseCommand(symbolTable, *this, procedures, isInFor);
-}
-std::vector<std::string> CommandWhile::executeCommand(SymbolTable& symbolTable, 
-        std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::vector<std::shared_ptr<Procedure>>& procedures,
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand,  
         bool isInFor)
 {
     std::vector<std::string> asmCommands;
-    std::vector<std::string> asmCommandsWhile;
-
-    for (auto& command : commands)
-    {
-        auto tempVec = command->executeCommand(symbolTable, procedures);
-        asmCommandsWhile.insert(asmCommandsWhile.end(), tempVec.begin(), tempVec.end());
-    }
-    auto amountWhileCommands = asmCommandsWhile.size() + 1; //plus jump to condition
+    std::vector<std::string> asmCommandsIF;
 
     auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
     auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
@@ -256,6 +251,222 @@ std::vector<std::string> CommandWhile::executeCommand(SymbolTable& symbolTable,
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
     auto condEnum = condition->condEnum;
+    int asmCommandCounter = asmCommands.size();
+    switch (condEnum)
+    {
+    case ConditionEnum::EQUAL:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::NOTEQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::MORE:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::LESS:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::MOREOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::LESSOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    default:
+        break;
+    }
+
+    for (auto& command : commands)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsIF.size(), isInFor);
+        asmCommandsIF.insert(asmCommandsIF.end(), tempVec.begin(), tempVec.end());
+    }
+    auto amountIfCommands = asmCommandsIF.size();
+
+
+    switch (condEnum)
+    {
+    case ConditionEnum::EQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+        
+        break;
+    case ConditionEnum::NOTEQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::MORE:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::LESS:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::MOREOREQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::LESSOREQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 1));
+        break;
+    
+    default:
+        break;
+    }
+
+    asmCommands.insert(asmCommands.end(), asmCommandsIF.begin(), asmCommandsIF.end());
+
+
+    return asmCommands;
+}
+std::vector<std::string> CommandIfElse::executeCommand(SymbolTable& symbolTable, 
+        std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
+        bool isInFor)
+{
+    std::vector<std::string> asmCommands;
+    std::vector<std::string> asmCommandsIF;
+    std::vector<std::string> asmCommandsElse;
+
+    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
+    asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
+
+    auto condEnum = condition->condEnum;
+    int asmCommandCounter = asmCommands.size();
+    switch (condEnum)
+    {
+    case ConditionEnum::EQUAL:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::NOTEQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::MORE:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::LESS:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::MOREOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::LESSOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    default:
+        break;
+    }
+
+    for (auto& command : commands2)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsElse.size(), isInFor);
+        asmCommandsElse.insert(asmCommandsElse.end(), tempVec.begin(), tempVec.end());
+    }
+    auto amountElseCommands = asmCommandsElse.size();
+
+    for (auto& command : commands1)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsIF.size(), isInFor);
+        asmCommandsIF.insert(asmCommandsIF.end(), tempVec.begin(), tempVec.end());
+    }
+    asmCommandsIF.push_back("    JUMP " + std::to_string(amountElseCommands + 1));
+    auto amountIfCommands = asmCommandsIF.size();
+
+    switch (condEnum)
+    {
+    case ConditionEnum::EQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+        
+        break;
+    case ConditionEnum::NOTEQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::MORE:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::LESS:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
+        asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::MOREOREQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+        break;
+    case ConditionEnum::LESSOREQUAL:
+        asmCommands.push_back("    SUB 10");
+        asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 1));
+        break;
+    
+    default:
+        break;
+    }
+
+    asmCommands.insert(asmCommands.end(), asmCommandsIF.begin(), asmCommandsIF.end());
+    asmCommands.insert(asmCommands.end(), asmCommandsElse.begin(), asmCommandsElse.end());
+
+
+    return asmCommands;
+}
+std::vector<std::string> CommandWhile::executeCommand(SymbolTable& symbolTable, 
+        std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
+        bool isInFor)
+{
+    std::vector<std::string> asmCommands;
+    std::vector<std::string> asmCommandsWhile;
+
+    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
+    asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
+
+    auto condEnum = condition->condEnum;
+    int asmCommandCounter = asmCommands.size();
+    switch (condEnum)
+    {
+    case ConditionEnum::EQUAL:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::NOTEQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::MORE:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::LESS:
+        asmCommandCounter += 3;
+        break;
+    case ConditionEnum::MOREOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    case ConditionEnum::LESSOREQUAL:
+        asmCommandCounter += 2;
+        break;
+    default:
+        break;
+    }
+
+    for (auto& command : commands)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsWhile.size(), isInFor);
+        asmCommandsWhile.insert(asmCommandsWhile.end(), tempVec.begin(), tempVec.end());
+    }
+    auto amountWhileCommands = asmCommandsWhile.size() + 1; //plus jump to condition
 
     switch (condEnum)
     {
@@ -302,13 +513,15 @@ std::vector<std::string> CommandWhile::executeCommand(SymbolTable& symbolTable,
 }
 std::vector<std::string> CommandRepeat::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
         bool isInFor)
 {
     std::vector<std::string> asmCommands;
 
     for (auto& command : commands)
     {
-        auto tempVec = command->executeCommand(symbolTable, procedures);
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommands.size(), isInFor);
         asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
     }
 
@@ -356,6 +569,8 @@ std::vector<std::string> CommandRepeat::executeCommand(SymbolTable& symbolTable,
 }
 std::vector<std::string> CommandForTo::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
         bool isInFor)
 {
     std::vector<std::string> asmCommand;
@@ -385,8 +600,8 @@ std::vector<std::string> CommandForTo::executeCommand(SymbolTable& symbolTable,
     
     for (auto& command : commands)
     {
-        auto tempVec = command->executeCommand(symbolTable, procedures, true);
-        asmCommandsFor.insert(asmCommandsFor.end(), tempVec.begin(), tempVec.end());
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommand.size() + asmCommandsFor.size() + 3, true); // +3 because LOAD, SUB and JPOS will be before commands in for
+        asmCommandsFor.insert(asmCommandsFor.end(), tempVec.begin(), tempVec.end()); 
     }
     asmCommandsFor.push_back("    LOAD " + std::to_string(itAddress));
     asmCommandsFor.push_back("    ADD 21");
@@ -409,6 +624,8 @@ std::vector<std::string> CommandForTo::executeCommand(SymbolTable& symbolTable,
 }
 std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
         bool isInFor)
 {
     std::vector<std::string> asmCommand;
@@ -438,7 +655,7 @@ std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable,
     
     for (auto& command : commands)
     {
-        auto tempVec = command->executeCommand(symbolTable, procedures, true);
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommand.size() + asmCommandsFor.size() + 3, true); //+3 like in ForTo
         asmCommandsFor.insert(asmCommandsFor.end(), tempVec.begin(), tempVec.end());
     }
     asmCommandsFor.push_back("    LOAD " + std::to_string(itAddress));
@@ -465,9 +682,11 @@ std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable,
 
 std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
         bool isInFor)
 {
-    std::vector<std::string> asmCommands;
+    std::vector<std::string> asmCommand;
 
     //validation of the call
     if (!isValidDeclared(symbolTable, procedures, procCall->name))
@@ -475,7 +694,7 @@ std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTabl
         throw std::invalid_argument("Procedure is not declared or declared in bad place");
     }
     if (!areArgsValid(symbolTable, procedures, procCall->name, procCall->args))
-        throw std::invalid_argument("Number or type of arguments are not valid");
+        throw std::invalid_argument("Number or type of arguments are not valid or some argument does not exist or it is an iterator");
 
     std::shared_ptr<Procedure> procedure;
 
@@ -488,21 +707,24 @@ std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTabl
     }
     
     procedure->fillArgsAddress(symbolTable, procCall);
+    auto startProcedure = procedureStartEndInAssembly[procCall->name].first;
+    long long jumpToProc = howManyAsmCommand + 3 - startProcedure; // +3 because SET, STORE and JUMP are added. 
 
-    for (auto& command : procedure->commands)
-    {
-        command->executeCommand(procedure->symbolTable, procedures, isInFor);
-    }
-    
+    asmCommand.push_back("    SET " + std::to_string(howManyAsmCommand + 4));
+    asmCommand.push_back("    STORE " + std::to_string(procedure->rntrAddress));
+    asmCommand.push_back("    JUMP " + std::to_string(-jumpToProc));
 
-    return asmCommands;
+    return asmCommand;
 }
 
 
 
 std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable, 
-                                                    std::vector<std::shared_ptr<Procedure>>& procedures, 
-                                                    bool isInFor) {
+        std::vector<std::shared_ptr<Procedure>>& procedures, 
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand, 
+        bool isInFor) 
+{
     std::vector<std::string> asmCommands;
     auto idName = identifier->name1;
     bool isDeclared;
@@ -513,19 +735,23 @@ std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable,
     {
         if (!symbolTable.isIterator(identifier->name1) || identifier->idEnum != IdentifierEnum::PID)
         {
+            std::cout << identifier->name1 <<std::endl;
             throw std::invalid_argument("Undeclared argument");
         }
+        throw std::invalid_argument("you can't change an iterator");
     }
 
-
-    if (identifier->idEnum == IdentifierEnum::PID) {
+    if (identifier->idEnum == IdentifierEnum::PID) 
+    {
         asmCommands.push_back("    GET " + std::to_string(symbolTable.getPidAddress(idName, isInFor)));
-    } else if (identifier->idEnum == IdentifierEnum::PIDT) {
+    } 
+    else if (identifier->idEnum == IdentifierEnum::PIDT) 
+    {
         asmCommands.push_back("    GET " + 
                                 std::to_string(symbolTable.getTableAddress(identifier->name1, identifier->num)));
-    } else if (identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-
+    } 
+    else if (identifier->idEnum == IdentifierEnum::PIDTPID) 
+    {
         asmCommands.push_back("    GET 2");
         asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(identifier->name1)));
         asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
@@ -540,9 +766,12 @@ std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable,
 }
 
 
-std::vector<std::string> CommandWrite::executeCommand(SymbolTable& symbolTable, 
-        std::vector<std::shared_ptr<Procedure>>& procedures, 
-        bool isInFor) {
+std::vector<std::string> CommandWrite::executeCommand(SymbolTable& symbolTable,
+        std::vector<std::shared_ptr<Procedure>>& procedures,
+        std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
+        int howManyAsmCommand,
+        bool isInFor) 
+{
     std::vector<std::string> asmCommands;
 
     if (value->valEnum == ValueEnum::NUM) {

@@ -237,13 +237,26 @@ std::string SymbolTable::getMembership()
 void SymbolTable::addArgsAddress(std::string& argument, long long address, ArgsDeclarationEnum argsDeclEnum)
 {
 
+        std::cout << " ROzmiar: " << arguments_adress.size() << std::endl;
     std::cout << "argument: " << argument << " , address: " << address <<std::endl;
     if (argsDeclEnum == ArgsDeclarationEnum::PID)
     {
+        arguments_adress.erase(argument);
         arguments_adress.insert({argument, address});
     }
     else
     {
+        argument_table_address.erase(argument);
         argument_table_address.insert({argument, address});
     }
+}
+
+long long SymbolTable::getFirstFreeAddress()
+{
+    return firstFreeAddress;
+}
+
+void SymbolTable::increaseFirstFreeAddress()
+{
+    firstFreeAddress++;
 }
