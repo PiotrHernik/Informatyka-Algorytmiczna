@@ -237,8 +237,6 @@ std::string SymbolTable::getMembership()
 void SymbolTable::addArgsAddress(std::string& argument, long long address, ArgsDeclarationEnum argsDeclEnum)
 {
 
-        std::cout << " ROzmiar: " << arguments_adress.size() << std::endl;
-    std::cout << "argument: " << argument << " , address: " << address <<std::endl;
     if (argsDeclEnum == ArgsDeclarationEnum::PID)
     {
         arguments_adress.erase(argument);

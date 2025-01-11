@@ -5,10 +5,10 @@ void mainProgram(std::vector<std::shared_ptr<Procedure>>& procedures, std::share
     for(auto& proc : procedures)
     {
         proc->fillSymbolTable();
-        proc->symbolTable.printAllDeclAndArgs();
+        // proc->symbolTable.printAllDeclAndArgs();
     }
     program->fillSymbolTable();
-    program->symbolTable.printAllDeclAndArgs();
+    // program->symbolTable.printAllDeclAndArgs();
     program->executeCommand(procedures);
 
 }

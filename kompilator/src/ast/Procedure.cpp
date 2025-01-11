@@ -39,7 +39,6 @@ void Procedure::fillSymbolTable(){
 
 void Procedure::fillArgsAddress(SymbolTable& externSymbolTable, std::shared_ptr<ProcCall> procCall)
 {
-    std::cout << "DUPAA: " << procCall->name <<std::endl;
     for (size_t i = 0; i < procHead->argsDecl.size(); i++)
     {
         auto argProcCall = procCall->args[i];
@@ -84,4 +83,17 @@ std::vector<std::string> Procedure::executeCommand(std::vector<std::shared_ptr<P
     asmCommands.push_back("    RTRN " + std::to_string(rntrAddress));
 
     return asmCommands;
+}
+
+std::vector<std::string> Procedure::getProceduresNameCalled() const
+{
+    std::vector<std::string> proceduresCalled;
+    for(auto& command : commands)
+    {
+        if(const auto& procCall = std::dynamic_pointer_cast<CommandProcCall>(command))
+        {
+            proceduresCalled.emplace_back(procCall->getProcedureName());
+        }
+    }
+    return proceduresCalled;
 }

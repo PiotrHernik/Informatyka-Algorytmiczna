@@ -13,12 +13,10 @@ MainWithDecl::MainWithDecl(std::vector<std::shared_ptr<Declaration>> declaration
 
 std::string MainWithDecl::doAsm() const 
 {
-    std::cout << "MainWithDecl  start" <<std::endl;
     for(auto comm : commands)
     {
         comm->doAsm();
     }
-    std::cout << "MainWithDecl  end" <<std::endl;
     return std::string("MainwithDecl");
 }
 
@@ -30,7 +28,7 @@ void MainWithDecl::fillSymbolTable() {
 
     
 
-void MainWithDecl::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
+void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
 {
     std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly;
     std::vector<std::string> allCommands;
@@ -43,31 +41,34 @@ void MainWithDecl::executeCommand(std::vector<std::shared_ptr<Procedure>>& proce
         throw std::invalid_argument("The are few procedures with the same name");
     }
 
-    for (auto& proc : procedures)
-    {
-        auto temp = proc->countAsmCommand(procedures);
-        procedureStartEndInAssembly.insert({proc->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + temp)});
-        asmCommandsInProcedures += temp;
-    }
+    auto proceduresCallInMain = findProcedureCallName();
+    auto proceduresGraph = makeProceduresGraph(procedures, proceduresCallInMain);
 
-    std::cout << " PO liczeniu____" <<std::endl;
+    for (auto& procName : proceduresGraph)
+    {
+        const auto& it = std::find_if(procedures.begin(), procedures.end(), [&procName](std::shared_ptr<Procedure> proc){ return procName == proc->procHead->name; });
+        auto&& amountAsmCmndInProc = (*it)->countAsmCommand(procedures);
+        procedureStartEndInAssembly.insert({(*it)->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + amountAsmCmndInProc)});
+        asmCommandsInProcedures += amountAsmCmndInProc;
+    }
 
     for(auto& command : commands)
     {
-        auto tempVector = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, asmCommandsInProcedures + mainCommands.size());
-        mainCommands.insert(mainCommands.end(), tempVector.begin(), tempVector.end());
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, asmCommandsInProcedures + mainCommands.size());
+        mainCommands.insert(mainCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
 
-    for(auto& proc : procedures)
+    for(auto& proc : proceduresGraph)
     {
-        auto tempVec = proc->executeCommand(procedures, procedureStartEndInAssembly, procedureStartEndInAssembly[proc->procHead->name].first - 1);
-        procedureCommands.insert(procedureCommands.end(), tempVec.begin(), tempVec.end());
+        const auto& it = std::find_if(procedures.begin(), procedures.end(), [&proc](std::shared_ptr<Procedure> procedure){ return procedure->procHead->name == proc; });
+        auto&& tempVec = (*it)->executeCommand(procedures, procedureStartEndInAssembly, procedureStartEndInAssembly[(*it)->procHead->name].first - 1);
+        procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
 
     allCommands.push_back("    JUMP " + std::to_string(procedureCommands.size() + 1)); // jump after procedures - it is first command
 
-    allCommands.insert(allCommands.end(), procedureCommands.begin(), procedureCommands.end());
-    allCommands.insert(allCommands.end(), mainCommands.begin(), mainCommands.end());
+    allCommands.insert(allCommands.end(), std::make_move_iterator(procedureCommands.begin()), std::make_move_iterator(procedureCommands.end()));
+    allCommands.insert(allCommands.end(), std::make_move_iterator(mainCommands.begin()), std::make_move_iterator(mainCommands.end()));
     
 
 
@@ -97,54 +98,7 @@ std::string MainWithoutDecl::doAsm() const
 
 void MainWithoutDecl::fillSymbolTable() {}
 
-void MainWithoutDecl::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
-{
-    std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly;
-    std::vector<std::string> allCommands;
-    std::vector<std::string> procedureCommands;
-    std::vector<std::string> mainCommands;
-    int asmCommandsInProcedures = 0;
-
-    if (areMuliplyProcedure(procedures))
-    {
-        throw std::invalid_argument("The are few procedures with the same name");
-    }
-
-    for (auto& proc : procedures)
-    {
-        auto temp = proc->countAsmCommand(procedures);
-        procedureStartEndInAssembly.insert({proc->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + temp)});
-        asmCommandsInProcedures += temp;
-    }
-
-    for(auto& command : commands)
-    {
-        auto tempVector = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, asmCommandsInProcedures + mainCommands.size());
-        mainCommands.insert(mainCommands.end(), tempVector.begin(), tempVector.end());
-    }
-
-    for(auto& proc : procedures)
-    {
-        auto tempVec = proc->executeCommand(procedures, procedureStartEndInAssembly, procedureStartEndInAssembly[proc->procHead->name].first - 1);
-        procedureCommands.insert(procedureCommands.end(), tempVec.begin(), tempVec.end());
-    }
-
-    allCommands.push_back("    JUMP " + std::to_string(procedureCommands.size() + 1)); // jump after procedures - it is first command
-
-    allCommands.insert(allCommands.end(), procedureCommands.begin(), procedureCommands.end());
-    allCommands.insert(allCommands.end(), mainCommands.begin(), mainCommands.end());
-    
-
-
-
-    for (auto& line : allCommands)
-    {
-        symbolTable.outputFile << line << std::endl;
-    }
-    symbolTable.outputFile << "    HALT" << std::endl;
-}
-
-bool Main::areMuliplyProcedure(std::vector<std::shared_ptr<Procedure>>& procedures)
+bool Main::areMuliplyProcedure(std::vector<std::shared_ptr<Procedure>>& procedures) const
 {
     for(auto i = 0; i < procedures.size(); i++)
     {
@@ -157,4 +111,45 @@ bool Main::areMuliplyProcedure(std::vector<std::shared_ptr<Procedure>>& procedur
     }
 
     return false;
+}
+
+std::vector<std::string> Main::findProcedureCallName() const
+{
+    std::vector<std::string> proceduresCallInMain;
+
+    for(const auto& command : commands)
+    {
+        if (auto procCall = std::dynamic_pointer_cast<CommandProcCall>(command))
+        {
+            if (std::find(proceduresCallInMain.begin(), proceduresCallInMain.end(), procCall->getProcedureName()) == proceduresCallInMain.end())
+                proceduresCallInMain.emplace_back(procCall->getProcedureName());
+        }
+    }
+    return proceduresCallInMain;
+}
+
+std::vector<std::string> Main::makeProceduresGraph(std::vector<std::shared_ptr<Procedure>>& procedures, std::vector<std::string>& proceduresInMain) const
+{
+    std::vector<std::string> proceduresGraph(proceduresInMain);
+    for(auto i = 0; i < proceduresGraph.size(); i++)
+    {
+        auto& procInMain = proceduresGraph[i];
+        auto it = std::find_if(procedures.begin(), procedures.end(), [&procInMain](std::shared_ptr<Procedure> proc){ return procInMain ==  proc->procHead->name; });
+        if (it == procedures.end())
+        {
+            throw std::invalid_argument("there is no procedure: " + procInMain);
+        }
+        auto&& proceduresCalledInProcedure = (*it)->getProceduresNameCalled();
+        
+        for(auto& procName : proceduresCalledInProcedure)
+        {
+            if (std::find(proceduresGraph.begin(), proceduresGraph.end(), procName) == proceduresGraph.end())
+            {
+                proceduresGraph.emplace_back(procName);
+            }
+        }
+
+    }
+
+    return proceduresGraph;
 }

@@ -20,5 +20,6 @@ BEGIN
 x:= 2;
 y := 3;
 z[x] := 4;
-gcd(x,y,z);
+#gcd(x,y,z);
+abc(x,y,z);
 END

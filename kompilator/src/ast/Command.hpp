@@ -44,9 +44,6 @@ protected:
     std::vector<std::string> makeAsmValue2(SymbolTable&, bool) const;
 
     std::shared_ptr<Condition> condition;
-
-    friend std::vector<std::string> executeIfCommand(SymbolTable&, const CommandIf&, std::vector<std::shared_ptr<Procedure>>&, bool);
-    friend std::vector<std::string> executeIfElseCommand(SymbolTable&, const CommandIfElse&, std::vector<std::shared_ptr<Procedure>>&, bool);
 };
 
 struct CommandIfElse : CommandCondition
@@ -119,6 +116,7 @@ struct CommandProcCall : Command
     CommandProcCall(std::shared_ptr<ProcCall>);
     std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
+    std::string getProcedureName() const;
     bool isValidDeclared(SymbolTable& symbolTable, std::vector<std::shared_ptr<Procedure>>& procedures, std::string procCallName);
     bool areArgsValid(SymbolTable& symbolTable, 
                     std::vector<std::shared_ptr<Procedure>>& procedures, 

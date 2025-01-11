@@ -125,6 +125,11 @@ std::string CommandWrite::doAsm() const
     return std::string("Command Write");
 }
 
+std::string CommandProcCall::getProcedureName() const 
+{
+    return procCall->name;
+}
+
 
 std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
@@ -735,7 +740,6 @@ std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable,
     {
         if (!symbolTable.isIterator(identifier->name1) || identifier->idEnum != IdentifierEnum::PID)
         {
-            std::cout << identifier->name1 <<std::endl;
             throw std::invalid_argument("Undeclared argument");
         }
         throw std::invalid_argument("you can't change an iterator");
