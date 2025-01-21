@@ -156,7 +156,7 @@ expression:
         value { $$ = std::make_shared<Expression>(std::move($1), ExpressionEnum::VALUE); }
         | value PLUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::PLUS); }
         | value MINUS value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MINUS); }
-        | value MULT value { std::cout << "okej mam mult " <<std::endl; $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MULT); }
+        | value MULT value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MULT); }
         | value DIV value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::DIV); }
         | value MOD value { $$ = std::make_shared<Expression>(std::move($1), std::move($3), ExpressionEnum::MOD); }
 

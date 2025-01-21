@@ -43,6 +43,7 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     }
 
     auto proceduresCallInMain = findProcedureCallName();
+    std::cout << proceduresCallInMain.size() << " dupaaa" << std::endl;
     auto proceduresGraph = makeProceduresGraph(procedures, proceduresCallInMain);
 
     bool isMultiply = false;
@@ -59,7 +60,7 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         {
             isMultiply = true;
         }
-        else if ((*it)->isDivOrMod())
+        if ((*it)->isDivOrMod())
         {
             isDivOrMod = true;
         }
@@ -69,10 +70,12 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     {
         if (command->isMultiplication())
         {
+            std::cout << "Jestem tutaj" <<std::endl;
             isMultiply = true;
         }
-        else if (command->isDivOrMod())
+        if (command->isDivOrMod())
         {
+            std::cout << "Jestem tutaj dupa" <<std::endl;
             isDivOrMod = true;
         }
     }
@@ -84,7 +87,7 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         procedureStartEndInAssembly.insert({"multiply", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures +  Arithmetics::asmMultiplySize)});
         asmCommandsInProcedures += Arithmetics::asmMultiplySize;
     }
-    else if (isDivOrMod)
+    if (isDivOrMod)
     {
         Arithmetics::rtntAddressDivide = symbolTable.getFirstFreeAddress();
         symbolTable.increaseFirstFreeAddress();
@@ -105,19 +108,25 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         const auto& it = std::find_if(procedures.begin(), procedures.end(), [&proc](std::shared_ptr<Procedure> procedure){ return procedure->procHead->name == proc; });
         auto&& tempVec = (*it)->executeCommand(procedures, procedureStartEndInAssembly, procedureStartEndInAssembly[(*it)->procHead->name].first - 1);
         procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
+        std::cout << "Procedure graph" << std::endl;
     }
+        std::cout << "Procedure comad size:" <<procedureCommands.size() << std::endl;
+
 
     if (isMultiply)
     {
+        std::cout << "Jest mnożenie:" << std::endl;
         auto tempVec = Arithmetics::multiply();
         procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
-    else if (isDivOrMod)
+    if (isDivOrMod)
     {
+        std::cout << "Jest dzielenie:" << std::endl;
         auto tempVec = Arithmetics::divide();
         procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
     
+        std::cout << "Procedure comad size after:" <<procedureCommands.size() << std::endl;
 
     allCommands.push_back("    JUMP " + std::to_string(procedureCommands.size() + 1)); // jump after procedures - it is first command
 
@@ -173,10 +182,12 @@ std::vector<std::string> Main::findProcedureCallName() const
 
     for(const auto& command : commands)
     {
-        if (auto procCall = std::dynamic_pointer_cast<CommandProcCall>(command))
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
         {
-            if (std::find(proceduresCallInMain.begin(), proceduresCallInMain.end(), procCall->getProcedureName()) == proceduresCallInMain.end())
-                proceduresCallInMain.emplace_back(procCall->getProcedureName());
+            std::cout << "hehe" << std::endl;
+            if (std::find(proceduresCallInMain.begin(), proceduresCallInMain.end(), procCallName) == proceduresCallInMain.end())
+                proceduresCallInMain.emplace_back(procCallName);
         }
     }
     return proceduresCallInMain;
@@ -187,6 +198,7 @@ std::vector<std::string> Main::makeProceduresGraph(std::vector<std::shared_ptr<P
     std::vector<std::string> proceduresGraph(proceduresInMain);
     for(auto i = 0; i < proceduresGraph.size(); i++)
     {
+            std::cout << "DUpa " << i << std::endl;
         auto& procInMain = proceduresGraph[i];
         auto it = std::find_if(procedures.begin(), procedures.end(), [&procInMain](std::shared_ptr<Procedure> proc){ return procInMain ==  proc->procHead->name; });
         if (it == procedures.end())

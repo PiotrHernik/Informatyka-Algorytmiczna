@@ -11,13 +11,15 @@ std::vector<std::string> Arithmetics::multiply()
 {
     std::vector<std::string> asmCommands;
 
-    asmCommands.push_back("    SET 1"); 
+    asmCommands.push_back("    SET 1 #mnożenie"); 
     asmCommands.push_back("    STORE 21");
     asmCommands.push_back("    SET 0"); 
     asmCommands.push_back("    STORE 7");
     asmCommands.push_back("    LOAD 11"); // VALUE1
-    asmCommands.push_back("    JNEG 11"); //JUMPX
+    asmCommands.push_back("    JZERO 71");
+    asmCommands.push_back("    JNEG 12"); //JUMPX
     asmCommands.push_back("    LOAD 10"); //VALUE2
+    asmCommands.push_back("    JZERO 68");
     asmCommands.push_back("    JPOS 6"); //jump aa
     asmCommands.push_back("    LOAD 21");
     asmCommands.push_back("    SUB 21");
@@ -95,7 +97,7 @@ std::vector<std::string> Arithmetics::divide()
     std::vector<std::string> asmCommands;
 
 
-    asmCommands.push_back("    LOAD 11");
+    asmCommands.push_back("    LOAD 11 #Dzielenie");
     asmCommands.push_back("    JZERO 103"); //JUMP ENDZERO
     asmCommands.push_back("    LOAD 10");
     asmCommands.push_back("    JZERO 100"); //JUMP ENDZERO

@@ -5,7 +5,7 @@ class Arithmetics
 {
 public:
 
-static const int asmMultiplySize = 75;
+static const int asmMultiplySize = 77;
 static const int asmDivideSize = 107;
 
 static int rtntAddressMultiply;

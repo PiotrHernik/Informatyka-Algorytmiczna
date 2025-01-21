@@ -23,6 +23,7 @@ struct Command : Node
     virtual ~Command() = default;
     virtual bool isMultiplication() = 0;
     virtual bool isDivOrMod() = 0;
+    virtual std::string ifIsProcCallGetName() = 0;
 
     CommandEnum commandEnum;
 };
@@ -37,6 +38,7 @@ struct CommandAssign : Command
     // std::vector<std::string> divide();
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
     // std::vector<std::string> makeAsmValue1(SymbolTable&, bool);
     // std::vector<std::string> makeAsmValue2(SymbolTable&, bool);
 
@@ -61,6 +63,7 @@ struct CommandIfElse : CommandCondition
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::vector<std::shared_ptr<Command>> commands1;
     std::vector<std::shared_ptr<Command>> commands2;
@@ -73,6 +76,7 @@ struct CommandIf : CommandCondition
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::vector<std::shared_ptr<Command>> commands;
 };
@@ -84,6 +88,7 @@ struct CommandWhile : CommandCondition
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::vector<std::shared_ptr<Command>> commands;
 };
@@ -95,6 +100,7 @@ struct CommandRepeat : CommandCondition
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::vector<std::shared_ptr<Command>> commands;
 };
@@ -106,6 +112,7 @@ struct CommandForTo : Command
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::string pid;
     std::shared_ptr<Value> value1;
@@ -120,6 +127,7 @@ struct CommandDownTo : Command
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::string pid;
     std::shared_ptr<Value> value1;
@@ -140,6 +148,8 @@ struct CommandProcCall : Command
                     std::vector<std::shared_ptr<Args>> args);
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
+
     std::shared_ptr<ProcCall> procCall;
 };
 
@@ -150,6 +160,7 @@ struct CommandRead : Command
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
 
     std::shared_ptr<Identifier> identifier;
 };
@@ -161,6 +172,7 @@ struct CommandWrite : Command
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
+    std::string ifIsProcCallGetName() override;
     
     std::shared_ptr<Value> value;
 };

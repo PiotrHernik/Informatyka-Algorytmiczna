@@ -172,7 +172,7 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
         if (symbolTable.isArgument(identifier->name1, DeclarationEnum::TABLE))
         {
             destinationAddress = -2;
-            asmCommands.push_back("    SET " + std::to_string(identifier->num));
+            asmCommands.push_back("    SET " + std::to_string(identifier->num) + "#Assign PIDT");
             asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(identifier->name1)));
             asmCommands.push_back("    STORE 17");
         }
@@ -584,6 +584,7 @@ std::vector<std::string> CommandIf::executeCommand(SymbolTable& symbolTable,
 
     return asmCommands;
 }
+
 std::vector<std::string> CommandIfElse::executeCommand(SymbolTable& symbolTable, 
         std::vector<std::shared_ptr<Procedure>>& procedures, 
         std::unordered_map<std::string, std::pair<int, int>> procedureStartEndInAssembly,
@@ -625,18 +626,19 @@ std::vector<std::string> CommandIfElse::executeCommand(SymbolTable& symbolTable,
         break;
     }
 
-    for (auto& command : commands2)
-    {
-        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsElse.size(), isInFor);
-        asmCommandsElse.insert(asmCommandsElse.end(), tempVec.begin(), tempVec.end());
-    }
-    auto amountElseCommands = asmCommandsElse.size();
-
     for (auto& command : commands1)
     {
         auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsIF.size(), isInFor);
         asmCommandsIF.insert(asmCommandsIF.end(), tempVec.begin(), tempVec.end());
     }
+
+    for (auto& command : commands2)
+    {
+        auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, howManyAsmCommand + asmCommandCounter + asmCommandsIF.size() + 1 + asmCommandsElse.size(), isInFor);
+        asmCommandsElse.insert(asmCommandsElse.end(), tempVec.begin(), tempVec.end());
+    }
+    auto amountElseCommands = asmCommandsElse.size();
+
     asmCommandsIF.push_back("    JUMP " + std::to_string(amountElseCommands + 1));
     auto amountIfCommands = asmCommandsIF.size();
 
@@ -904,7 +906,7 @@ std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable,
     auto tempVec2 = makeAsmValue2(symbolTable, value2, true);
 
     asmCommand.insert(asmCommand.end(), tempVec1.begin(), tempVec1.end());
-    asmCommand.push_back("    STORE " + std::to_string(itAddress));
+    asmCommand.push_back("    STORE " + std::to_string(itAddress) + "#po ustawieniu make value");
 
     asmCommand.insert(asmCommand.end(), tempVec2.begin(), tempVec2.end());
     asmCommand.push_back("    STORE " + std::to_string(toAddress));
@@ -924,12 +926,12 @@ std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable,
 
 
     long long amountForCommands = asmCommandsFor.size();
-    asmCommandsFor.push_back("    JUMP " + std::to_string(-(amountForCommands + 2))); //powrót do sprawdzenia "warunku" SUB, JNEG (w akumulatorze został wynik z dodanie 1 do iteratora)
+    asmCommandsFor.push_back("    JUMP " + std::to_string(-(amountForCommands + 2)) + "# skok do sprawdzenia warunku"); //powrót do sprawdzenia "warunku" SUB, JNEG (w akumulatorze został wynik z dodanie 1 do iteratora)
     amountForCommands++;
 
     asmCommand.push_back("    LOAD " + std::to_string(itAddress));
     asmCommand.push_back("    SUB " + std::to_string(toAddress));
-    asmCommand.push_back("    JNEG " + std::to_string(amountForCommands + 1));
+    asmCommand.push_back("    JNEG " + std::to_string(amountForCommands + 1) + "#koniec downTO");
 
     asmCommand.insert(asmCommand.end(), asmCommandsFor.begin(), asmCommandsFor.end());
 
@@ -978,12 +980,26 @@ std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTabl
         auto argsEnum = procedure->procHead->argsDecl[i]->argsDecEnum;
         if (argsEnum == ArgsDeclarationEnum::PID)
         {
-            asmCommand.push_back("    SET " + std::to_string(symbolTable.getPidAddress(procCall->args[i]->name)));
+            if (symbolTable.isArgument(procCall->args[i]->name, DeclarationEnum::PID))
+            {
+                asmCommand.push_back("    LOAD " + std::to_string(symbolTable.getPidAddress(procCall->args[i]->name)));
+            }
+            else
+            {
+                asmCommand.push_back("    SET " + std::to_string(symbolTable.getPidAddress(procCall->args[i]->name)));
+            }
             asmCommand.push_back("    STORE " + std::to_string(procedure->symbolTable.getPidAddress(procedure->procHead->argsDecl[i]->name)));
         }
         else
         {
-            asmCommand.push_back("    SET " + std::to_string(symbolTable.getTableAddress(procCall->args[i]->name)));
+            if (symbolTable.isArgument(procCall->args[i]->name, DeclarationEnum::TABLE))
+            {
+                asmCommand.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(procCall->args[i]->name)));
+            }
+            else
+            {
+                asmCommand.push_back("    SET " + std::to_string(symbolTable.getTableAddress(procCall->args[i]->name)));
+            }
             asmCommand.push_back("    STORE " + std::to_string(procedure->symbolTable.getTableAddress(procedure->procHead->argsDecl[i]->name)));
         }
     }
@@ -1260,22 +1276,16 @@ bool CommandIfElse::isMultiplication()
 {
     for(auto& command : commands1)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     for(auto& command : commands2)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1285,12 +1295,9 @@ bool CommandIf::isMultiplication()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1300,13 +1307,10 @@ bool CommandWhile::isMultiplication()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
-        } 
+            return true;  
+        }
     }
     return false;
 }
@@ -1315,13 +1319,10 @@ bool CommandRepeat::isMultiplication()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
-        } 
+            return true;  
+        }  
     }
     return false;
 }
@@ -1330,12 +1331,9 @@ bool CommandForTo::isMultiplication()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1345,13 +1343,10 @@ bool CommandDownTo::isMultiplication()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isMultiplication())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
-            {
-                return true;
-            }   
-        } 
+            return true;
+        }
     }
     return false;
 }
@@ -1381,24 +1376,16 @@ bool CommandIfElse::isDivOrMod()
 {
     for(auto& command : commands1)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
-        } 
+            return true;  
+        }  
     }
     for(auto& command : commands2)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1408,13 +1395,9 @@ bool CommandIf::isDivOrMod()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1424,13 +1407,9 @@ bool CommandWhile::isDivOrMod()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1440,13 +1419,9 @@ bool CommandRepeat::isDivOrMod()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1456,14 +1431,10 @@ bool CommandForTo::isDivOrMod()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
-        } 
+            return true;  
+        }
     }
     return false;
 }
@@ -1472,13 +1443,9 @@ bool CommandDownTo::isDivOrMod()
 {
     for(auto& command : commands)
     {
-        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        if (command->isDivOrMod())
         {
-            if (commandAssign->expression->expEnum == ExpressionEnum::DIV 
-            || commandAssign->expression->expEnum == ExpressionEnum::MOD)
-            {
-                return true;
-            }   
+            return true;  
         } 
     }
     return false;
@@ -1488,4 +1455,111 @@ bool CommandProcCall::isDivOrMod()
 {
     
     return false;
+}
+
+std::string CommandWrite::ifIsProcCallGetName()
+{
+    return "";
+}
+
+std::string CommandRead::ifIsProcCallGetName()
+{
+    return "";
+}
+
+std::string CommandAssign::ifIsProcCallGetName()
+{
+    return "";   
+}
+
+std::string CommandIfElse::ifIsProcCallGetName()
+{
+    for(auto& command : commands1)
+    {   
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        }
+    }
+    for(auto& command : commands2)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        } 
+    }
+    return "";
+}
+
+std::string CommandIf::ifIsProcCallGetName()
+{
+    for(auto& command : commands)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        } 
+    }
+    return "";
+}
+
+std::string CommandWhile::ifIsProcCallGetName()
+{
+    for(auto& command : commands)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        } 
+    }
+    return "";
+}
+
+std::string CommandRepeat::ifIsProcCallGetName()
+{
+    for(auto& command : commands)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        } 
+    }
+    return "";
+}
+
+std::string CommandForTo::ifIsProcCallGetName()
+{
+    for(auto& command : commands)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        }
+    }
+    return "";
+}
+
+std::string CommandDownTo::ifIsProcCallGetName()
+{
+    for(auto& command : commands)
+    {
+        auto procCallName = command->ifIsProcCallGetName();
+        if (procCallName != "")
+        {
+            return procCallName;  
+        } 
+    }
+    return "";
+}
+
+std::string CommandProcCall::ifIsProcCallGetName()
+{
+    
+    return procCall->name;
 }

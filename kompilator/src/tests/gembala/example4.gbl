@@ -1,19 +1,20 @@
-# Kombinacje
-# ? 20
-# ? 9
-# > 167960
+#pragma test in(20, 9) out(167960)
 
 PROCEDURE s(n,m) IS
     o
 BEGIN
     m:=1;
     FOR i FROM n DOWNTO 2 DO
+	WRITE i;
         o:=i%2;
         IF o=1 THEN
             m:=m*i;
         ELSE
+	
             m:=i*m;
+	    #READ m;
         ENDIF
+	WRITE m;
     ENDFOR
 END
 

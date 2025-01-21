@@ -1050,7 +1050,7 @@ namespace yy {
 
   case 35: // expression: value MULT value
 #line 159 "main/parser.ypp"
-                           { std::cout << "okej mam mult " <<std::endl; yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MULT); }
+                           { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MULT); }
 #line 1055 "main/parser.cpp"
     break;
 
