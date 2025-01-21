@@ -616,7 +616,7 @@ std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable, s
     auto idEnum = identifier->idEnum;
 
     if(!isValidIdentifier(symbolTable, identifier))
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("Undeclared argument1");
 
 
     if (identifier->idEnum == IdentifierEnum::PID) {
@@ -651,7 +651,7 @@ std::vector<std::string> CommandWrite::executeCommand(SymbolTable& symbolTable, 
     }
 
     if(!isValidIdentifier(symbolTable, value->identifier))
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("Undeclared argument2");
 
 
     if (value->identifier->idEnum == IdentifierEnum::PID) {
@@ -685,7 +685,7 @@ std::vector<std::string> CommandAssign::makeAsmValue1(SymbolTable& symbolTable) 
     } 
 
     if(!isValidIdentifier(symbolTable, expression->value1->identifier))
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("3");
 
     if (expression->value1->identifier->idEnum == IdentifierEnum::PID) {
         asmCommands.push_back("    LOAD " + 
@@ -758,7 +758,7 @@ std::vector<std::string> CommandCondition::makeAsmValue1(SymbolTable& symbolTabl
     } 
 
     if(!isValidIdentifier(symbolTable, condition->value1->identifier))
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("Undeclared argument4");
 
     if (condition->value1->identifier->idEnum == IdentifierEnum::PID) {
         asmCommands.push_back("    LOAD " + 
@@ -791,7 +791,7 @@ std::vector<std::string> CommandCondition::makeAsmValue2(SymbolTable& symbolTabl
     }
 
     if(!isValidIdentifier(symbolTable, condition->value2->identifier))
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("Undeclared argument5");
 
     if (condition->value2->identifier->idEnum == IdentifierEnum::PID) {
 

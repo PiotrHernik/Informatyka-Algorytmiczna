@@ -77,6 +77,7 @@ void SymbolTable::addDeclarations(std::shared_ptr<Declaration> decl)
 
         declarations.insert(decl->name);
         declaration_adress.insert({decl->name, firstFreeAddress});
+        std::cout << "Declaration: " << decl->name << ", in address: " <<firstFreeAddress << std::endl;
         firstFreeAddress++;
     }
     else if(decl->decEnum == DeclarationEnum::TABLE)
@@ -108,6 +109,8 @@ void SymbolTable::addArgs(std::shared_ptr<ArgsDeclaration> argsDecl)
         }
         
         arguments.insert(argsDecl->name);
+        argument_address.insert({argsDecl->name, firstFreeAddress});
+        ++firstFreeAddress;
     }
     else if(argsDecl->argsDecEnum == ArgsDeclarationEnum::TABLE)
     {
@@ -117,6 +120,8 @@ void SymbolTable::addArgs(std::shared_ptr<ArgsDeclaration> argsDecl)
         }
 
         arguments_tables.insert(argsDecl->name);
+        arg_tab_address.insert({argsDecl->name, firstFreeAddress});
+        ++firstFreeAddress;
     }
     else throw std::invalid_argument("Type of Declaration is wrong");
 }
@@ -156,7 +161,7 @@ long long SymbolTable::getPidAddress(std::string name, bool isInFor)
     }
     else
     {
-        return arguments_adress[name];
+        return argument_address[name];
     }
     
     
@@ -180,7 +185,7 @@ long long SymbolTable::getTableAddress(std::string name, long long num)
     }
     else
     {
-        auto zeroInTable = argument_table_address[name];
+        auto zeroInTable = arg_tab_address[name];
 
         return zeroInTable + num;
     }
@@ -198,11 +203,36 @@ long long SymbolTable::getTableAddress(std::string name)
     }
     else if (isArgument(name, DeclarationEnum::TABLE))
     {
-        tableBegin = argument_table_address[name];
+        tableBegin = arg_tab_address[name];
         offset = 0;
     }
 
     return tableBegin - offset;
+}
+
+
+long long SymbolTable::getArgPidAddressForProcCall(std::string& name)
+{
+    if (argument_adress_for_procCall[name].size() > 0)
+        return argument_adress_for_procCall[name][currProcCall];
+    else
+        return 0;
+}
+
+long long SymbolTable::getArgTableAddressForProcCall(std::string& name, long long num)
+{
+    if (argument_table_addres_for_procCall[name].size() > 0)
+        return argument_table_addres_for_procCall[name][currProcCall] + num;
+    else
+        return 0;
+}
+
+long long SymbolTable::getArgTableAddressForProcCall(std::string& name)
+{
+    if (argument_table_addres_for_procCall[name].size() > 0)
+        return argument_table_addres_for_procCall[name][currProcCall];
+    else
+        return 0;
 }
 
 std::pair<long long, long long> SymbolTable::addIterator(std::string itName)
@@ -235,17 +265,29 @@ std::string SymbolTable::getMembership()
 }
 
 void SymbolTable::addArgsAddress(std::string& argument, long long address, ArgsDeclarationEnum argsDeclEnum)
-{
-
+{   
     if (argsDeclEnum == ArgsDeclarationEnum::PID)
     {
-        arguments_adress.erase(argument);
-        arguments_adress.insert({argument, address});
+        if (numProcCall == 1)
+        {
+            argument_adress_for_procCall.insert({argument, std::vector<long long>{address}});
+        }
+        else
+        {
+            argument_adress_for_procCall[argument].push_back(address);
+        }
+        std::cout << "Adding arg: " <<argument << ", with address: " <<address <<std::endl;
     }
     else
     {
-        argument_table_address.erase(argument);
-        argument_table_address.insert({argument, address});
+        if (numProcCall == 1)
+        {
+            argument_table_addres_for_procCall.insert({argument, std::vector<long long>{address}});
+        }
+        else
+        {
+            argument_table_addres_for_procCall[argument].push_back(address);
+        }
     }
 }
 
@@ -257,4 +299,14 @@ long long SymbolTable::getFirstFreeAddress()
 void SymbolTable::increaseFirstFreeAddress()
 {
     firstFreeAddress++;
+}
+
+void SymbolTable::increasNumProcCall()
+{
+    ++numProcCall;
+}
+
+void SymbolTable::increasCurrProcCall()
+{
+    ++currProcCall;
 }

@@ -82,6 +82,8 @@ std::vector<std::string> Procedure::executeCommand(std::vector<std::shared_ptr<P
 
     asmCommands.push_back("    RTRN " + std::to_string(rntrAddress));
 
+    symbolTable.increasCurrProcCall();
+    
     return asmCommands;
 }
 
@@ -96,4 +98,19 @@ std::vector<std::string> Procedure::getProceduresNameCalled() const
         }
     }
     return proceduresCalled;
+}
+
+bool Procedure::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }

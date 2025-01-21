@@ -1,0 +1,14 @@
+PROGRAM IS
+x, y, z[-10:10]
+BEGIN
+x:= 2135321453;
+y := 43545345;
+z[0] := x / y;
+WRITE z[0];
+z[0] := x % y;
+WRITE z[0];
+z[0] := y / x;
+WRITE z[0];
+z[0] := y % x;
+WRITE z[0];
+END

@@ -1,0 +1,23 @@
+PROCEDURE abc(a, b, T c) IS
+BEGIN
+READ a;
+READ b;
+READ c[2];
+READ c[a];
+
+WRITE a;
+WRITE b;
+WRITE c[2];
+WRITE c[a];
+
+END
+
+
+PROGRAM IS
+x, y, z[-2:10]
+BEGIN
+abc(x,y,z);
+
+
+
+END

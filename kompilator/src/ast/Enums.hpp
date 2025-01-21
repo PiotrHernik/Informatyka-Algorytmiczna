@@ -59,6 +59,7 @@ enum class CommandEnum
     WRITE
 }; //potrzebne?
 
+
 enum class ProcedureEnum
 {
     WITHDECLARATION,

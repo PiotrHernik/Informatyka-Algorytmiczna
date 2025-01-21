@@ -27,6 +27,7 @@ struct Procedure : Node
     std::vector<std::string> executeCommand(std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int);
     std::vector<std::string> getProceduresNameCalled() const;
     int countAsmCommand(std::vector<std::shared_ptr<Procedure>>&);
+    bool isMultiplication();
 
     std::shared_ptr<ProcHead> procHead;
     std::vector<std::shared_ptr<Declaration>> declarations;

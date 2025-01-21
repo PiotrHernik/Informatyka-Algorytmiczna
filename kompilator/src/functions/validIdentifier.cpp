@@ -1,7 +1,10 @@
 #include "validIdentifier.hpp"
 
+#include <iostream>
 
-bool isValidIdentifier(SymbolTable& symbolTable, std::shared_ptr<Identifier> identifier){
+
+bool isValidIdentifier(SymbolTable& symbolTable, std::shared_ptr<Identifier> identifier)
+{
     auto idEnum = identifier->idEnum;
     if (idEnum == IdentifierEnum::PID)
     {

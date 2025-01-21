@@ -3,6 +3,7 @@
 
 #include "Main.hpp"
 #include "Enums.hpp"
+#include "../functions/arithmetics.hpp"
 
 MainWithDecl::MainWithDecl(std::vector<std::shared_ptr<Declaration>> declarations, std::vector<std::shared_ptr<Command>> commands)
     : declarations(declarations)
@@ -44,26 +45,55 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     auto proceduresCallInMain = findProcedureCallName();
     auto proceduresGraph = makeProceduresGraph(procedures, proceduresCallInMain);
 
+    bool isMultiply = false;
+    //counting asmCommand in procedures
     for (auto& procName : proceduresGraph)
     {
         const auto& it = std::find_if(procedures.begin(), procedures.end(), [&procName](std::shared_ptr<Procedure> proc){ return procName == proc->procHead->name; });
         auto&& amountAsmCmndInProc = (*it)->countAsmCommand(procedures);
-        procedureStartEndInAssembly.insert({(*it)->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + amountAsmCmndInProc)});
+        procedureStartEndInAssembly.insert({(*it)->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + Arithmetics::asmMultiplySize)});
         asmCommandsInProcedures += amountAsmCmndInProc;
+
+        if ((*it)->isMultiplication())
+        {
+            isMultiply = true;
+        }
     }
 
+    for(auto& command : commands)
+    {
+        if (command->isMultiplication())
+        {
+            isMultiply = true;
+        }
+    }
+
+    if (isMultiply)
+    {
+        procedureStartEndInAssembly.insert({"multiply", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + amountAsmCmndInProc)});
+    }
+
+    // executeing commands in program
     for(auto& command : commands)
     {
         auto tempVec = command->executeCommand(symbolTable, procedures, procedureStartEndInAssembly, asmCommandsInProcedures + mainCommands.size());
         mainCommands.insert(mainCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
 
+    // executing commands in procedures
     for(auto& proc : proceduresGraph)
     {
         const auto& it = std::find_if(procedures.begin(), procedures.end(), [&proc](std::shared_ptr<Procedure> procedure){ return procedure->procHead->name == proc; });
         auto&& tempVec = (*it)->executeCommand(procedures, procedureStartEndInAssembly, procedureStartEndInAssembly[(*it)->procHead->name].first - 1);
         procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
+
+    if (isMultiply)
+    {
+        auto tempVec = Arithmetics::multiply();
+        procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
+    }
+    
 
     allCommands.push_back("    JUMP " + std::to_string(procedureCommands.size() + 1)); // jump after procedures - it is first command
 

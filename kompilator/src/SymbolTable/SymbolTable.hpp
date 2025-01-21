@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <vector>
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -38,12 +39,17 @@ public:
     long long getPidAddress(std::string, bool = false);
     long long getTableAddress(std::string, long long);
     long long getTableAddress(std::string);
+    long long getArgPidAddressForProcCall(std::string&);
+    long long getArgTableAddressForProcCall(std::string&);
+    long long getArgTableAddressForProcCall(std::string&, long long);
     long long getFirstFreeAddress();
     void increaseFirstFreeAddress();
     void addArgsAddress(std::string&, long long, ArgsDeclarationEnum);
     void setOutputFile(const char* outputFile);
+    void increasNumProcCall();
+    void increasCurrProcCall();
 
-    std::string getMembership();
+    std::string getMembership(); 
 
     static std::fstream outputFile;
 
@@ -56,14 +62,19 @@ private:
     std::unordered_map<std::string, std::pair<long long, long long>> size_and_offset_declaration_tables;
 
     std::set<std::string> arguments;
-    std::unordered_map<std::string, long long> arguments_adress;
+    std::unordered_map<std::string, long long> argument_address;
+    std::unordered_map<std::string, std::vector<long long>> argument_adress_for_procCall;
     std::set<std::string> arguments_tables;
-    std::unordered_map<std::string, long long> argument_table_address;
+    std::unordered_map<std::string, long long> arg_tab_address;
+    std::unordered_map<std::string, std::vector<long long>> argument_table_addres_for_procCall;
 
     std::set<std::string> iterators;
     std::unordered_map<std::string, long long> interator_address;
 
-    std::string membership;
+    std::string membership; // it's need to know if it is a main program or a procedure
+
+    int numProcCall = 0;
+    int currProcCall = 0;
 
     static long long firstFreeAddress;
 

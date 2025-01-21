@@ -4,6 +4,8 @@
 #include "../astUtilities/commandsUtilities/CommandIf.hpp"
 #include "../astUtilities/commandsUtilities/CommandIfElse.hpp"
 #include "../functions/validIdentifier.hpp"
+#include "../functions/makeAsmValue1.hpp"
+#include "../functions/makeAsmValue2.hpp"
 
 CommandAssign::CommandAssign(std::shared_ptr<Identifier> id, std::shared_ptr<Expression> expr)
     : identifier(std::move(id)), expression(std::move(expr))
@@ -137,6 +139,7 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
         int howManyAsmCommand, 
         bool isInFor)
 {
+    std::cout << static_cast<int>(expression->expEnum) <<std::endl;
     std::vector<std::string> asmCommands;
     long long destinationAddress = -1;
     auto idEnum = identifier->idEnum;
@@ -148,63 +151,141 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
             throw std::invalid_argument("You can not change iterator");
         }
         
-        throw std::invalid_argument("Undeclared argument");
+        throw std::invalid_argument("Undeclared argument6");
     }
     
     if (idEnum == IdentifierEnum::PID)
     {
-        destinationAddress = symbolTable.getPidAddress(identifier->name1, isInFor);
+        // if (symbolTable.isArgument(identifier->name1, DeclarationEnum::PID))
+        // {
+        //     destinationAddress = symbolTable.getArgPidAddressForProcCall(identifier->name1);
+        // }
+        // else
+        // {
+            destinationAddress = symbolTable.getPidAddress(identifier->name1, isInFor);
+        // }
+        
     }
-    else if (idEnum == IdentifierEnum::PIDT)
+    else if (idEnum == IdentifierEnum::PIDT) //tutaj trzeba dodać koda asm żeby ustawiał destination addres w 7
     {
-        destinationAddress = symbolTable.getTableAddress(identifier->name1, identifier->num);
+        if (symbolTable.isArgument(identifier->name1, DeclarationEnum::TABLE))
+        {
+            destinationAddress = -2;
+            asmCommands.push_back("    SET " + std::to_string(identifier->num));
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(identifier->name1)));
+            asmCommands.push_back("    STORE 17");
+        }
+        else
+        {
+            destinationAddress = symbolTable.getTableAddress(identifier->name1, identifier->num);
+        }
     }
     else
     {
-        asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(identifier->name1)) + "  #Assign pid[pid]");
-        asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        if (symbolTable.isArgument(identifier->name1, DeclarationEnum::TABLE))
+        {
+            asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(identifier->name1)) + "  #Assign pid[pid]");
+        }
+        else
+        {
+            asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(identifier->name1)) + "  #Assign pid[pid]");
+        }
+        if (symbolTable.isArgument(identifier->name2, DeclarationEnum::PID))
+        {
+            asmCommands.push_back("    ADDI " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        }
+        else
+        {
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        }
         asmCommands.push_back("    STORE 15");
     }
-
-    auto expEnum = expression->expEnum;
     
-    switch (expEnum) {
+    switch (expression->expEnum) {
     case ExpressionEnum::VALUE: {
-        auto valueInstructions = makeAsmValue1(symbolTable, isInFor);
+        auto valueInstructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
         asmCommands.insert(asmCommands.end(), valueInstructions.begin(), valueInstructions.end());
-
         if (destinationAddress == -1) 
             asmCommands.push_back("    STOREI 15");
         else 
-            asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+        {
+            auto declEnum = convertIdEnToDeclEn(identifier->idEnum);
+
+            if (symbolTable.isArgument(identifier->name1, declEnum))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if(idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    STOREI 17");
+                }
+                
+            }
+            else
+            {
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
 
         break;
     }
     case ExpressionEnum::PLUS: {
-        if (expression->value1->valEnum == ValueEnum::NUM && expression->value2->valEnum == ValueEnum::NUM) {
+        if (expression->value1->valEnum == ValueEnum::NUM && expression->value2->valEnum == ValueEnum::NUM) 
+        {
             auto result = expression->value1->value + expression->value2->value;
             asmCommands.push_back("    SET " + std::to_string(result));
 
             if (destinationAddress == -1) 
                 asmCommands.push_back("    STOREI 15");
             else 
-                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+                if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+                {
+                    if (idEnum == IdentifierEnum::PID)
+                    {
+                        asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                    }
+                    else if(idEnum == IdentifierEnum::PIDT)
+                    {
+                        asmCommands.push_back("    STOREI 17");
+                    }
+                }
+                else
+                {
+                    asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+                }
 
             break;
         }
 
-        auto value2Instructions = makeAsmValue2(symbolTable, isInFor);
+        auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
         asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
 
-        auto value1Instructions = makeAsmValue1(symbolTable, isInFor);
+        auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
         asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
 
         asmCommands.push_back("    ADD 10");
         if (destinationAddress == -1) 
             asmCommands.push_back("    STOREI 15");
         else 
-            asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
-
+        {
+            if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if (idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    STOREI 17");
+                }
+            }
+            else
+            {
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
         break;
     }
     case ExpressionEnum::MINUS: {
@@ -215,22 +296,174 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
             if (destinationAddress == -1) 
                 asmCommands.push_back("    STOREI 15");
             else 
-                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            {
+                if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+                {
+                    if (idEnum == IdentifierEnum::PID)
+                    {
+                        asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                    }
+                    else if (idEnum == IdentifierEnum::PIDT)
+                    {
+                        asmCommands.push_back("    STOREI 17");
+                    }
+                }
+                else
+                {
+                    asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+                }
+            }
 
             break;
         }
 
-        auto value2Instructions = makeAsmValue2(symbolTable, isInFor);
+        auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
         asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
 
-        auto value1Instructions = makeAsmValue1(symbolTable, isInFor);
+        auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
         asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
 
         asmCommands.push_back("    SUB 10");
         if (destinationAddress == -1) 
             asmCommands.push_back("    STOREI 15");
         else 
-            asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+        {
+            if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if (idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    STOREI 17");
+                }
+            }
+            else
+            {
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
+
+        break;
+    }
+    case ExpressionEnum::MULT:
+    {
+        auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
+        asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
+
+        auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
+        asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
+
+        auto tempVec = multiply();
+
+        asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
+
+        if (destinationAddress == -1) 
+            asmCommands.push_back("    STOREI 15");
+        else 
+        {
+            if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if (idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    STOREI 17");
+                }
+            }
+            else
+            {
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
+        break;
+    }
+    case ExpressionEnum::DIV:
+    {
+        asmCommands.push_back("    SET 1");
+        asmCommands.push_back("    STORE 21");
+        auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
+        asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
+
+        auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
+        asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
+
+        auto tempVec = divide();
+
+        asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
+
+        if (destinationAddress == -1) 
+        {
+            asmCommands.push_back("    LOAD 4");
+            asmCommands.push_back("    STOREI 15");
+        }
+        else 
+        {
+            if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    LOAD 4");
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if (idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    LOAD 4");
+                    asmCommands.push_back("    STOREI 17");
+                }
+            }
+            else
+            {
+                asmCommands.push_back("    LOAD 4");
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
+
+        break;
+    }
+    case ExpressionEnum::MOD:
+    {
+        asmCommands.push_back("    SET 1");
+        asmCommands.push_back("    STORE 21");
+        auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
+        asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
+
+        auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
+        asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
+
+        auto tempVec = divide();
+
+        asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
+
+        if (destinationAddress == -1) 
+        {
+            asmCommands.push_back("    LOAD 3");
+            asmCommands.push_back("    STOREI 15");
+        }
+        else 
+        {
+            if (symbolTable.isArgument(identifier->name1, convertIdEnToDeclEn(identifier->idEnum)))
+            {
+                if (idEnum == IdentifierEnum::PID)
+                {
+                    asmCommands.push_back("    LOAD 3");
+                    asmCommands.push_back("    STOREI " + std::to_string(destinationAddress));
+                }
+                else if (idEnum == IdentifierEnum::PIDT)
+                {
+                    asmCommands.push_back("    LOAD 3");
+                    asmCommands.push_back("    STOREI 17");
+                }
+            }
+            else
+            {
+                asmCommands.push_back("    LOAD 3");
+                asmCommands.push_back("    STORE " + std::to_string(destinationAddress));
+            }
+        }
 
         break;
     }
@@ -250,8 +483,8 @@ std::vector<std::string> CommandIf::executeCommand(SymbolTable& symbolTable,
     std::vector<std::string> asmCommands;
     std::vector<std::string> asmCommandsIF;
 
-    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
-    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    auto tempVec2 = makeAsmValue2(symbolTable, condition->value2, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, condition->value1, isInFor);
     asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
@@ -339,8 +572,8 @@ std::vector<std::string> CommandIfElse::executeCommand(SymbolTable& symbolTable,
     std::vector<std::string> asmCommandsIF;
     std::vector<std::string> asmCommandsElse;
 
-    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
-    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    auto tempVec2 = makeAsmValue2(symbolTable, condition->value2, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, condition->value1, isInFor);
     asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
@@ -435,8 +668,8 @@ std::vector<std::string> CommandWhile::executeCommand(SymbolTable& symbolTable,
     std::vector<std::string> asmCommands;
     std::vector<std::string> asmCommandsWhile;
 
-    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
-    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    auto tempVec2 = makeAsmValue2(symbolTable, condition->value2, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, condition->value1, isInFor);
     asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
@@ -530,8 +763,8 @@ std::vector<std::string> CommandRepeat::executeCommand(SymbolTable& symbolTable,
         asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
     }
 
-    auto tempVec2 = makeAsmValue2(symbolTable, isInFor);
-    auto tempVec1 = makeAsmValue1(symbolTable, isInFor);
+    auto tempVec2 = makeAsmValue2(symbolTable, condition->value2, isInFor);
+    auto tempVec1 = makeAsmValue1(symbolTable, condition->value1, isInFor);
     asmCommands.insert(asmCommands.end(), tempVec2.begin(), tempVec2.end());
     asmCommands.insert(asmCommands.end(), tempVec1.begin(), tempVec1.end());
 
@@ -590,8 +823,8 @@ std::vector<std::string> CommandForTo::executeCommand(SymbolTable& symbolTable,
     
     auto [itAddress, toAddress] = symbolTable.addIterator(pid);
 
-    auto tempVec1 = makeAsmValue1(symbolTable, true);
-    auto tempVec2 = makeAsmValue2(symbolTable, true);
+    auto tempVec1 = makeAsmValue1(symbolTable, value1, true);
+    auto tempVec2 = makeAsmValue2(symbolTable, value2, true);
 
     asmCommand.insert(asmCommand.end(), tempVec1.begin(), tempVec1.end());
     asmCommand.push_back("    STORE " + std::to_string(itAddress));
@@ -645,8 +878,8 @@ std::vector<std::string> CommandDownTo::executeCommand(SymbolTable& symbolTable,
     
     auto [itAddress, toAddress] = symbolTable.addIterator(pid);
 
-    auto tempVec1 = makeAsmValue1(symbolTable, true);
-    auto tempVec2 = makeAsmValue2(symbolTable, true);
+    auto tempVec1 = makeAsmValue1(symbolTable, value1, true);
+    auto tempVec2 = makeAsmValue2(symbolTable, value2, true);
 
     asmCommand.insert(asmCommand.end(), tempVec1.begin(), tempVec1.end());
     asmCommand.push_back("    STORE " + std::to_string(itAddress));
@@ -691,6 +924,8 @@ std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTabl
         int howManyAsmCommand, 
         bool isInFor)
 {
+    int procCallAsmCommandSize = 3 + 2 * procCall->args.size();
+    symbolTable.increasNumProcCall();
     std::vector<std::string> asmCommand;
 
     //validation of the call
@@ -710,13 +945,27 @@ std::vector<std::string> CommandProcCall::executeCommand(SymbolTable& symbolTabl
             procedure = procedures[i];
         }
     }
-    
     procedure->fillArgsAddress(symbolTable, procCall);
     auto startProcedure = procedureStartEndInAssembly[procCall->name].first;
-    long long jumpToProc = howManyAsmCommand + 3 - startProcedure; // +3 because SET, STORE and JUMP are added. 
+    long long jumpToProc = howManyAsmCommand + procCallAsmCommandSize - startProcedure;
 
-    asmCommand.push_back("    SET " + std::to_string(howManyAsmCommand + 4));
+    asmCommand.push_back("    SET " + std::to_string(howManyAsmCommand + procCallAsmCommandSize + 1));
     asmCommand.push_back("    STORE " + std::to_string(procedure->rntrAddress));
+    for(auto i = 0; i < procCall->args.size(); i++)
+    {
+        auto argsEnum = procedure->procHead->argsDecl[i]->argsDecEnum;
+        if (argsEnum == ArgsDeclarationEnum::PID)
+        {
+            asmCommand.push_back("    SET " + std::to_string(symbolTable.getPidAddress(procCall->args[i]->name)));
+            asmCommand.push_back("    STORE " + std::to_string(procedure->symbolTable.getPidAddress(procedure->procHead->argsDecl[i]->name)));
+        }
+        else
+        {
+            asmCommand.push_back("    SET " + std::to_string(symbolTable.getTableAddress(procCall->args[i]->name)));
+            asmCommand.push_back("    STORE " + std::to_string(procedure->symbolTable.getTableAddress(procedure->procHead->argsDecl[i]->name)));
+        }
+    }
+
     asmCommand.push_back("    JUMP " + std::to_string(-jumpToProc));
 
     return asmCommand;
@@ -733,34 +982,68 @@ std::vector<std::string> CommandRead::executeCommand(SymbolTable& symbolTable,
     std::vector<std::string> asmCommands;
     auto idName = identifier->name1;
     bool isDeclared;
-    bool isArg;
     auto idEnum = identifier->idEnum;
 
     if(!isValidIdentifier(symbolTable, identifier))
     {
         if (!symbolTable.isIterator(identifier->name1) || identifier->idEnum != IdentifierEnum::PID)
         {
-            throw std::invalid_argument("Undeclared argument");
+            throw std::invalid_argument("Undeclared argument7");
         }
         throw std::invalid_argument("you can't change an iterator");
     }
 
     if (identifier->idEnum == IdentifierEnum::PID) 
     {
-        asmCommands.push_back("    GET " + std::to_string(symbolTable.getPidAddress(idName, isInFor)));
+        if (symbolTable.isArgument(idName, DeclarationEnum::PID))
+        {
+            asmCommands.push_back("    GET 0");
+            asmCommands.push_back("    STOREI " + std::to_string(symbolTable.getPidAddress(idName)));
+        }
+        else
+        {
+            asmCommands.push_back("    GET " + std::to_string(symbolTable.getPidAddress(idName, isInFor)));
+        }
     } 
     else if (identifier->idEnum == IdentifierEnum::PIDT) 
     {
-        asmCommands.push_back("    GET " + 
+        if (symbolTable.isArgument(idName, DeclarationEnum::TABLE))
+        {
+            asmCommands.push_back("    SET " + std::to_string(identifier->num));
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(identifier->name1)));
+            asmCommands.push_back("    STORE 2");
+            asmCommands.push_back("    GET 0");
+            asmCommands.push_back("    STOREI 2");
+        }
+        else
+        {
+            asmCommands.push_back("    GET " + 
                                 std::to_string(symbolTable.getTableAddress(identifier->name1, identifier->num)));
+        }
+        
     } 
     else if (identifier->idEnum == IdentifierEnum::PIDTPID) 
     {
-        asmCommands.push_back("    GET 2");
-        asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(identifier->name1)));
-        asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        // asmCommands.push_back("    GET 2");
+        if (symbolTable.isArgument(identifier->name1, DeclarationEnum::TABLE))
+        {
+            asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(identifier->name1, isInFor)));
+        }
+        else
+        {
+            asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(identifier->name1, isInFor)));
+        }
+        if (symbolTable.isArgument(identifier->name2, DeclarationEnum::PID))
+        {
+            asmCommands.push_back("    ADDI " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        }
+        else
+        {
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(identifier->name2, isInFor)));
+        }
+        
         asmCommands.push_back("    STORE 1");
-        asmCommands.push_back("    LOAD 2");
+        asmCommands.push_back("    GET 0");
         asmCommands.push_back("    STOREI 1");
     } else {
         throw std::invalid_argument("Bad Identifier Enum");
@@ -777,7 +1060,6 @@ std::vector<std::string> CommandWrite::executeCommand(SymbolTable& symbolTable,
         bool isInFor) 
 {
     std::vector<std::string> asmCommands;
-
     if (value->valEnum == ValueEnum::NUM) {
         asmCommands.push_back("    SET " + std::to_string(value->value));
         asmCommands.push_back("    PUT 0");
@@ -788,341 +1070,58 @@ std::vector<std::string> CommandWrite::executeCommand(SymbolTable& symbolTable,
     {
         if (!symbolTable.isIterator(value->identifier->name1) || value->identifier->idEnum != IdentifierEnum::PID)
         {
-            throw std::invalid_argument("Undeclared argument");
+            throw std::invalid_argument("Undeclared argument8");
         }
     }
 
     if (value->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    PUT " + std::to_string(symbolTable.getPidAddress(value->identifier->name1, isInFor)));
+        if(symbolTable.isArgument(value->identifier->name1, DeclarationEnum::PID))
+        {
+            asmCommands.push_back("    LOADI " + std::to_string(symbolTable.getPidAddress(value->identifier->name1)));
+            asmCommands.push_back("    PUT 0");
+        }
+        else
+        {
+            asmCommands.push_back("    PUT " + std::to_string(symbolTable.getPidAddress(value->identifier->name1, isInFor)));
+        }
     } 
     else if (value->identifier->idEnum == IdentifierEnum::PIDT) {
-
-        asmCommands.push_back("    PUT " +
+        if (symbolTable.isArgument(value->identifier->name1, DeclarationEnum::TABLE))
+        {
+            asmCommands.push_back("    SET " + std::to_string(value->identifier->num));
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(value->identifier->name1)));
+            asmCommands.push_back("    LOADI 0");
+            asmCommands.push_back("    PUT 0");
+        }
+        else
+        {
+            asmCommands.push_back("    PUT " +
                               std::to_string(symbolTable.getTableAddress(value->identifier->name1, value->identifier->num)));
+        }        
     } 
     else if (value->identifier->idEnum == IdentifierEnum::PIDTPID) {
-        asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(value->identifier->name1)));
-        asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(value->identifier->name2, isInFor)));
+        if (symbolTable.isArgument(value->identifier->name1, DeclarationEnum::TABLE))
+        {
+            asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(value->identifier->name1)));
+        }
+        else
+        {
+            asmCommands.push_back("    SET " + std::to_string(symbolTable.getTableAddress(value->identifier->name1)));
+        }
+        if (symbolTable.isArgument(value->identifier->name2, DeclarationEnum::PID))
+        {
+            asmCommands.push_back("    ADDI " + std::to_string(symbolTable.getPidAddress(value->identifier->name2)));
+        }
+        else
+        {
+            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(value->identifier->name2, isInFor)));
+        }
+        
         asmCommands.push_back("    LOADI 0");
         asmCommands.push_back("    PUT 0");
     } else {
         throw std::invalid_argument("Invalid Identifier Enum");
     }
-
-    return asmCommands;
-}
-
-
-std::vector<std::string> CommandAssign::makeAsmValue1(SymbolTable& symbolTable, bool isInFor) {
-    std::vector<std::string> asmCommands;
-
-
-    if (expression->value1->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(expression->value1->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, expression->value1->identifier))
-    {
-        if (!symbolTable.isIterator(expression->value1->identifier->name1) || expression->value1->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (expression->value1->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(expression->value1->identifier->name1, isInFor)));
-    } 
-    else if (expression->value1->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(expression->value1->identifier->name1, 
-                                                                         expression->value1->identifier->num)));
-    } 
-    else if (expression->value1->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(expression->value1->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(expression->value1->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
-
-    return asmCommands;
-}
-
-
-std::vector<std::string> CommandAssign::makeAsmValue2(SymbolTable& symbolTable, bool isInFor) {
-    std::vector<std::string> asmCommands;
-
-    if (expression->value2->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(expression->value2->value));
-        asmCommands.push_back("    STORE 10");
-        return asmCommands;
-    }
-
-    if (!isValidIdentifier(symbolTable, expression->value2->identifier))
-    {
-        if (!symbolTable.isIterator(expression->value2->identifier->name1) || expression->value2->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (expression->value2->identifier->idEnum == IdentifierEnum::PID) {
-
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(expression->value2->identifier->name1, isInFor)));
-        asmCommands.push_back("    STORE 10");
-    } 
-    else if (expression->value2->identifier->idEnum == IdentifierEnum::PIDT) {
-
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(expression->value2->identifier->name1, 
-                                                                         expression->value2->identifier->num)));
-        asmCommands.push_back("    STORE 10");
-    } 
-    else if (expression->value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(expression->value2->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(expression->value2->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-        asmCommands.push_back("    STORE 10");
-    } 
-
-    return asmCommands;
-}
-
-
-
-std::vector<std::string> CommandCondition::makeAsmValue1(SymbolTable& symbolTable, bool isInFor) const
-{
-    std::vector<std::string> asmCommands;
-    if (condition->value1->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(condition->value1->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, condition->value1->identifier))
-    {
-        if (!symbolTable.isIterator(condition->value1->identifier->name1) || condition->value1->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (condition->value1->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(condition->value1->identifier->name1, isInFor)));
-    } 
-    else if (condition->value1->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(condition->value1->identifier->name1, 
-                                                                         condition->value1->identifier->num)));
-    } 
-    else if (condition->value1->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(condition->value1->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(condition->value1->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
-
-    return asmCommands;
-}
-std::vector<std::string> CommandCondition::makeAsmValue2(SymbolTable& symbolTable, bool isInFor) const
-{
-    std::vector<std::string> asmCommands;
-
-    if (condition->value2->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(condition->value2->value));
-        asmCommands.push_back("    STORE 10");
-        return asmCommands;
-    }
-
-    if (!isValidIdentifier(symbolTable, condition->value2->identifier))
-    {
-        if (!symbolTable.isIterator(condition->value2->identifier->name1) || condition->value2->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (condition->value2->identifier->idEnum == IdentifierEnum::PID) {
-
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(condition->value2->identifier->name1, isInFor)));
-        asmCommands.push_back("    STORE 10");
-    } 
-    else if (condition->value2->identifier->idEnum == IdentifierEnum::PIDT) {
-
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(condition->value2->identifier->name1, 
-                                                                         condition->value2->identifier->num)));
-        asmCommands.push_back("    STORE 10");
-    } 
-    else if (condition->value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(condition->value2->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(condition->value2->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-        asmCommands.push_back("    STORE 10");
-    } 
-
-    return asmCommands;
-}
-
-std::vector<std::string> CommandForTo::makeAsmValue1(SymbolTable& symbolTable, bool isInFor)
-{
-    std::vector<std::string> asmCommands;
-    if (value1->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value1->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, value1->identifier))
-    {
-        if (!symbolTable.isIterator(value1->identifier->name1) || value1->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (value1->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(value1->identifier->name1, isInFor)));
-    } 
-    else if (value1->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(value1->identifier->name1, 
-                                                                         value1->identifier->num)));
-    } 
-    else if (value1->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
-
-    return asmCommands;
-}
-
-std::vector<std::string> CommandForTo::makeAsmValue2(SymbolTable& symbolTable, bool isInFor)
-{
-    std::vector<std::string> asmCommands;
-    if (value2->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value2->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, value2->identifier))
-    {
-        if (!symbolTable.isIterator(value2->identifier->name1) || value2->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-        
-
-    if (value2->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(value2->identifier->name1, isInFor)));
-    } 
-    else if (value2->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(value2->identifier->name1, 
-                                                                         value2->identifier->num)));
-    } 
-    else if (value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
-
-    return asmCommands;
-}
-
-std::vector<std::string> CommandDownTo::makeAsmValue1(SymbolTable& symbolTable, bool isInFor)
-{
-    std::vector<std::string> asmCommands;
-    if (value1->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value1->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, value1->identifier))
-    {
-        if (!symbolTable.isIterator(value1->identifier->name1) || value1->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-
-    if (value1->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(value1->identifier->name1, isInFor)));
-    } 
-    else if (value1->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(value1->identifier->name1, 
-                                                                         value1->identifier->num)));
-    } 
-    else if (value1->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
-
-    return asmCommands;
-}
-
-std::vector<std::string> CommandDownTo::makeAsmValue2(SymbolTable& symbolTable, bool isInFor)
-{
-    std::vector<std::string> asmCommands;
-    if (value2->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value2->value));
-        return asmCommands;
-    } 
-
-    if (!isValidIdentifier(symbolTable, value2->identifier))
-    {
-        if (!symbolTable.isIterator(value2->identifier->name1) || value2->identifier->idEnum != IdentifierEnum::PID)
-        {
-            throw std::invalid_argument("Undeclared argument");
-        }
-    }
-        
-
-    if (value2->identifier->idEnum == IdentifierEnum::PID) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getPidAddress(value2->identifier->name1, isInFor)));
-    } 
-    else if (value2->identifier->idEnum == IdentifierEnum::PIDT) {
-        asmCommands.push_back("    LOAD " + 
-                              std::to_string(symbolTable.getTableAddress(value2->identifier->name1, 
-                                                                         value2->identifier->num)));
-    } 
-    else if (value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
-
-        asmCommands.push_back("    SET " + 
-                              std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
-        asmCommands.push_back("    ADD " + 
-                              std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
-        asmCommands.push_back("    LOADI 0");
-    } 
 
     return asmCommands;
 }
@@ -1204,4 +1203,341 @@ bool CommandProcCall::areArgsValid(SymbolTable& symbolTable, std::vector<std::sh
         }
     }
     return true;
+}
+
+DeclarationEnum Command::convertIdEnToDeclEn(IdentifierEnum& idEnum)
+{
+    DeclarationEnum declEnum;
+    if (idEnum == IdentifierEnum::PID)
+    {
+        declEnum = DeclarationEnum::PID; 
+    }
+    else
+    {
+        declEnum = DeclarationEnum::TABLE;
+    }
+    return declEnum;
+}
+
+// std::vector<std::string> CommandAssign::multiply()
+// {
+//     std::vector<std::string> asmCommands;
+
+//     asmCommands.push_back("    STORE 11"); // VALUE1
+//     asmCommands.push_back("    SET 1"); // VALUE1
+//     asmCommands.push_back("    STORE 21"); // VALUE1
+//     asmCommands.push_back("    LOAD 11"); // VALUE1
+//     asmCommands.push_back("    JNEG 11"); //JUMPX
+//     asmCommands.push_back("    LOAD 10"); //VALUE2
+//     asmCommands.push_back("    JPOS 6"); //jump aa
+//     asmCommands.push_back("    LOAD 21");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    STORE 12"); //ZNAK
+//     asmCommands.push_back("    JUMP 13"); //JUMP Y
+//     asmCommands.push_back("    LOAD 21");//aa
+//     asmCommands.push_back("    STORE 12");
+//     asmCommands.push_back("    JUMP 10"); //JUMP Y
+//     asmCommands.push_back("    LOAD 10"); //X
+//     asmCommands.push_back("    JNEG 6");//jumb bb
+//     asmCommands.push_back("    LOAD 21");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    STORE 12");
+//     asmCommands.push_back("    JUMP 3"); //JUMP Y
+//     asmCommands.push_back("    LOAD 21"); //bb
+//     asmCommands.push_back("    STORE 12");
+//     asmCommands.push_back("    LOAD 10");//Y
+//     asmCommands.push_back("    JPOS 3"); //jump a
+//     asmCommands.push_back("    SUB 10");
+//     asmCommands.push_back("    SUB 10");
+//     asmCommands.push_back("    STORE 1");//a
+//     asmCommands.push_back("    LOAD 11");
+//     asmCommands.push_back("    JPOS 3"); //JUMP B
+//     asmCommands.push_back("    SUB 11");
+//     asmCommands.push_back("    SUB 11");
+//     asmCommands.push_back("    STORE 2");//B
+//     asmCommands.push_back("    SUB 1");
+//     asmCommands.push_back("    JNEG 8"); //jump C
+//     asmCommands.push_back("    LOAD 1");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    STORE 8");
+//     asmCommands.push_back("    LOAD 2");
+//     asmCommands.push_back("    STORE 9");
+//     asmCommands.push_back("    STORE 7");
+//     asmCommands.push_back("    JUMP 8"); //JUMP D
+//     asmCommands.push_back("    LOAD 1");//C
+//     asmCommands.push_back("    STORE 9");
+//     asmCommands.push_back("    STORE 7");
+//     asmCommands.push_back("    LOAD 2");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    STORE 8");
+
+//     asmCommands.push_back("    LOAD 8"); //F
+//     asmCommands.push_back("    HALF");//D
+//     asmCommands.push_back("    ADD 0");
+//     asmCommands.push_back("    SUB 8");
+//     asmCommands.push_back("    JZERO 7"); //JUMP E
+//     asmCommands.push_back("    LOAD 7");
+//     asmCommands.push_back("    ADD 9");
+//     asmCommands.push_back("    STORE 7");
+//     asmCommands.push_back("    LOAD 8");
+//     asmCommands.push_back("    SUB 21");
+//     asmCommands.push_back("    JZERO 8"); //JUMP G
+//     asmCommands.push_back("    LOAD 8");//E
+//     asmCommands.push_back("    HALF");
+//     asmCommands.push_back("    STORE 8");
+//     asmCommands.push_back("    LOAD 7");
+//     asmCommands.push_back("    ADD 0");
+//     asmCommands.push_back("    STORE 7");
+//     asmCommands.push_back("    JUMP -17"); //JUMP F 
+    
+//     asmCommands.push_back("    LOAD 12"); // G
+//     asmCommands.push_back("    JPOS 5"); // JUMP END
+//     asmCommands.push_back("    LOAD 7");
+//     asmCommands.push_back("    SUB 7");
+//     asmCommands.push_back("    SUB 7");
+//     asmCommands.push_back("    JUMP 2"); //JUMP END +1
+    
+
+
+
+//     asmCommands.push_back("    LOAD 7");//END
+
+//     return asmCommands;
+// }
+
+std::vector<std::string> CommandAssign::divide()
+{
+    std::vector<std::string> asmCommands;
+
+    asmCommands.push_back("    JZERO 103"); //JUMP ENDZERO
+    asmCommands.push_back("    STORE 11");
+    asmCommands.push_back("    LOAD 10");
+    asmCommands.push_back("    JZERO 100"); //JUMP ENDZERO
+    asmCommands.push_back("    JNEG 6"); //JUMP X
+    asmCommands.push_back("    STORE 9");
+    asmCommands.push_back("    LOAD 21");
+    asmCommands.push_back("    STORE 7");
+    asmCommands.push_back("    JUMP 9");//JUMP Y
+    asmCommands.push_back("    LOAD 10");
+    asmCommands.push_back("    SUB 10"); //X - JEŚLI VALUE 2 JEST UJEMNA
+    asmCommands.push_back("    SUB 10");
+    asmCommands.push_back("    STORE 9");
+    asmCommands.push_back("    LOAD 21");
+    asmCommands.push_back("    SUB 21");
+    asmCommands.push_back("    SUB 21");
+    asmCommands.push_back("    STORE 7");
+    asmCommands.push_back("    LOAD 9");//Y ZAPISUJEMY NUM2 DO C
+    asmCommands.push_back("    STORE 2");
+    asmCommands.push_back("    LOAD 11"); 
+    asmCommands.push_back("    JNEG 6");//JUMP Z
+    asmCommands.push_back("    STORE 8");
+    asmCommands.push_back("    STORE 3");
+    asmCommands.push_back("    LOAD 21");
+    asmCommands.push_back("    JUMP 9");//JUMP b
+    asmCommands.push_back("    LOAD 11"); 
+    asmCommands.push_back("    SUB 11"); //Z 
+    asmCommands.push_back("    SUB 11"); 
+    asmCommands.push_back("    STORE 8"); 
+    asmCommands.push_back("    STORE 3"); // ZAPISUJE NUM1 DO R
+    asmCommands.push_back("    LOAD 21");
+    asmCommands.push_back("    SUB 21");
+    asmCommands.push_back("    SUB 21");
+    asmCommands.push_back("    STORE 6"); //B
+    asmCommands.push_back("    SET 0");
+    asmCommands.push_back("    STORE 1"); //ZAPISUJE 0 DO L I D
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    LOAD 2"); // A WHILE
+    asmCommands.push_back("    SUB 8");
+    asmCommands.push_back("    JPOS 9");// JUMP FOR
+    asmCommands.push_back("    JUMP 1"); 
+    asmCommands.push_back("    LOAD 1");
+    asmCommands.push_back("    ADD 21");
+    asmCommands.push_back("    STORE 1");
+    asmCommands.push_back("    LOAD 2");
+    asmCommands.push_back("    ADD 0");
+    asmCommands.push_back("    STORE 2");
+    asmCommands.push_back("    JUMP -9"); // JUMP A+1
+    asmCommands.push_back("    LOAD 1"); //FOR
+    asmCommands.push_back("    JZERO 21"); //JUMP AFTERFOR
+    asmCommands.push_back("    LOAD 2");
+    asmCommands.push_back("    HALF");
+    asmCommands.push_back("    STORE 2");
+    asmCommands.push_back("    SUB 3"); //IF
+    asmCommands.push_back("    JPOS 9"); //JUMP ELSE
+    asmCommands.push_back("    LOAD 4");
+    asmCommands.push_back("    ADD 0");
+    asmCommands.push_back("    ADD 21");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    LOAD 3");
+    asmCommands.push_back("    SUB 2");
+    asmCommands.push_back("    STORE 3");
+    asmCommands.push_back("    JUMP 4"); //JUMP DECRESE L
+    asmCommands.push_back("    LOAD 4"); // ELSE
+    asmCommands.push_back("    ADD 0");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    LOAD 1"); //DECRESE L
+    asmCommands.push_back("    SUB 21");
+    asmCommands.push_back("    STORE 1");
+    asmCommands.push_back("    JUMP -20"); //JUMP FOR + 1
+    asmCommands.push_back("    LOAD 3"); // AFTERFOR, RESZTA W 3, WYNIK W 4
+    asmCommands.push_back("    JZERO 35"); //JUMP END
+    asmCommands.push_back("    LOAD 6"); 
+    asmCommands.push_back("    JNEG 13"); //JUMP dZIELNAUJEMNA
+    asmCommands.push_back("    LOAD 7");
+    asmCommands.push_back("    JPOS 31"); //DODATNIA TO SKOK NA KONIEC BO WYNIK POPRAWNY
+    asmCommands.push_back("    LOAD 4");
+    asmCommands.push_back("    ADD 21");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    SUB 4");
+    asmCommands.push_back("    SUB 4");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    LOAD 3");
+    asmCommands.push_back("    SUB 9");
+    asmCommands.push_back("    STORE 3");
+    asmCommands.push_back("    JUMP 21"); //jump end
+    asmCommands.push_back("    LOAD 7"); //DZIELNA UJEMNA
+    asmCommands.push_back("    JNEG 11"); //JUMP DZIELNIKUJEMNY
+    asmCommands.push_back("    LOAD 4");
+    asmCommands.push_back("    ADD 21");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    SUB 4");
+    asmCommands.push_back("    SUB 4");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    LOAD 9");
+    asmCommands.push_back("    SUB 3");
+    asmCommands.push_back("    STORE 3");
+    asmCommands.push_back("    JUMP 9");
+    asmCommands.push_back("    LOAD 3"); //DZIELNIK UJEMNY
+    asmCommands.push_back("    SUB 3");
+    asmCommands.push_back("    SUB 3");
+    asmCommands.push_back("    STORE 3");
+    asmCommands.push_back("    JUMP 4");
+    asmCommands.push_back("    SET 0");
+    asmCommands.push_back("    STORE 4");
+    asmCommands.push_back("    STORE 3"); // END -1
+
+    return asmCommands;
+}
+
+bool CommandWrite::isMultiplication()
+{
+    return false;
+}
+
+bool CommandRead::isMultiplication()
+{
+    return false;
+}
+
+bool CommandAssign::isMultiplication()
+{
+    return expression->expEnum == ExpressionEnum::MULT;   
+}
+
+bool CommandIfElse::isMultiplication()
+{
+    for(auto& command : commands1)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    for(auto& command : commands2)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandIf::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandWhile::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandRepeat::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandForTo::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandDownTo::isMultiplication()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::MULT)
+            {
+                return true;
+            }   
+        } 
+    }
+    return false;
+}
+
+bool CommandProcCall::isMultiplication()
+{
+    
+    return false;
 }
