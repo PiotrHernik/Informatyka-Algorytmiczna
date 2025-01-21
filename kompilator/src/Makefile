@@ -31,6 +31,7 @@ SRC = $(SRC_DIR)/main.cpp \
       $(AST_DIR)/Value.cpp \
       SymbolTable/SymbolTable.cpp \
       $(FUNCTIONS_DIR)/validIdentifier.cpp \
+      $(FUNCTIONS_DIR)/arithmetics.cpp \
       $(UTILITIES_DIR)/makeArgs.cpp \
       $(UTILITIES_DIR)/makeArgsDeclaration.cpp \
       $(UTILITIES_DIR)/makeCommands.cpp \

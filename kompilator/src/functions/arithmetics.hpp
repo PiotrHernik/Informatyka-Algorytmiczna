@@ -5,7 +5,9 @@ class Arithmetics
 {
 public:
 
-static const asmMultiplySize;
+static const int asmMultiplySize = 74;
+
+static int rtntAddressMultiply;
 
 static std::vector<std::string> multiply();
 };

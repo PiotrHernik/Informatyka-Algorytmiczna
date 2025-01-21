@@ -6,6 +6,7 @@
 #include "../functions/validIdentifier.hpp"
 #include "../functions/makeAsmValue1.hpp"
 #include "../functions/makeAsmValue2.hpp"
+#include "../functions/arithmetics.hpp"
 
 CommandAssign::CommandAssign(std::shared_ptr<Identifier> id, std::shared_ptr<Expression> expr)
     : identifier(std::move(id)), expression(std::move(expr))
@@ -349,15 +350,24 @@ std::vector<std::string> CommandAssign::executeCommand(SymbolTable& symbolTable,
     }
     case ExpressionEnum::MULT:
     {
+
         auto value2Instructions = makeAsmValue2(symbolTable, expression->value2, isInFor);
         asmCommands.insert(asmCommands.end(), value2Instructions.begin(), value2Instructions.end());
 
         auto value1Instructions = makeAsmValue1(symbolTable, expression->value1, isInFor);
         asmCommands.insert(asmCommands.end(), value1Instructions.begin(), value1Instructions.end());
 
-        auto tempVec = multiply();
+        asmCommands.push_back("    STORE 11"); // VALUE1
 
-        asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
+        asmCommands.push_back("    SET " + std::to_string(howManyAsmCommand + asmCommands.size() + 4));
+        asmCommands.push_back("    STORE " + std::to_string(Arithmetics::rtntAddressMultiply));
+
+        std::cout << "rtrn" << Arithmetics::rtntAddressMultiply <<std::endl;
+        auto startMultiply = procedureStartEndInAssembly["multiply"].first;
+        long long jumpToMultiply = howManyAsmCommand + asmCommands.size() - startMultiply + 1;
+
+        asmCommands.push_back("    JUMP " + std::to_string(-jumpToMultiply));
+
 
         if (destinationAddress == -1) 
             asmCommands.push_back("    STOREI 15");

@@ -3,13 +3,13 @@
 #include <vector>
 #include <string>
 
-Arithmetics::asmMultiplySize = 74;
+int Arithmetics::rtntAddressMultiply = 0;
 
 std::vector<std::string> Arithmetics::multiply()
 {
     std::vector<std::string> asmCommands;
 
-    asmCommands.push_back("    STORE 11"); // VALUE1
+    
     asmCommands.push_back("    SET 1"); // VALUE1
     asmCommands.push_back("    STORE 21"); // VALUE1
     asmCommands.push_back("    LOAD 11"); // VALUE1
@@ -83,6 +83,7 @@ std::vector<std::string> Arithmetics::multiply()
     asmCommands.push_back("    SUB 7");
     asmCommands.push_back("    JUMP 2"); //JUMP END +1
     asmCommands.push_back("    LOAD 7");//END
+    asmCommands.push_back("    RTRN " + std::to_string(rtntAddressMultiply));
 
     return asmCommands;
 }

@@ -51,7 +51,7 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     {
         const auto& it = std::find_if(procedures.begin(), procedures.end(), [&procName](std::shared_ptr<Procedure> proc){ return procName == proc->procHead->name; });
         auto&& amountAsmCmndInProc = (*it)->countAsmCommand(procedures);
-        procedureStartEndInAssembly.insert({(*it)->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + Arithmetics::asmMultiplySize)});
+        procedureStartEndInAssembly.insert({(*it)->procHead->name, std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + amountAsmCmndInProc)});
         asmCommandsInProcedures += amountAsmCmndInProc;
 
         if ((*it)->isMultiplication())
@@ -70,7 +70,10 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
 
     if (isMultiply)
     {
-        procedureStartEndInAssembly.insert({"multiply", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures + amountAsmCmndInProc)});
+        Arithmetics::rtntAddressMultiply = symbolTable.getFirstFreeAddress();
+        symbolTable.increaseFirstFreeAddress();
+        procedureStartEndInAssembly.insert({"multiply", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures +  Arithmetics::asmMultiplySize)});
+        asmCommandsInProcedures += Arithmetics::asmMultiplySize;
     }
 
     // executeing commands in program

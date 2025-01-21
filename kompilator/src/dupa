@@ -1,0 +1,26 @@
+PROCEDURE abc(a, b, T c) IS
+BEGIN
+a := 3;
+b := 5;
+c[a] := c[5] + 22; #
+WRITE c[a];
+c[2] := c[a] + 4; #23
+WRITE c[2];
+a := 2 + c[a]; #25
+WRITE a;
+c[a] := c[2] - b;
+WRITE c[a];
+
+END
+
+
+PROGRAM IS
+x, y, z[-2:10]
+BEGIN
+
+abc(x,y,z);
+
+
+
+
+END
