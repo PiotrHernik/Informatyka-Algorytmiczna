@@ -46,6 +46,7 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     auto proceduresGraph = makeProceduresGraph(procedures, proceduresCallInMain);
 
     bool isMultiply = false;
+    bool isDivOrMod = false;
     //counting asmCommand in procedures
     for (auto& procName : proceduresGraph)
     {
@@ -58,6 +59,10 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         {
             isMultiply = true;
         }
+        else if ((*it)->isDivOrMod())
+        {
+            isDivOrMod = true;
+        }
     }
 
     for(auto& command : commands)
@@ -65,6 +70,10 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         if (command->isMultiplication())
         {
             isMultiply = true;
+        }
+        else if (command->isDivOrMod())
+        {
+            isDivOrMod = true;
         }
     }
 
@@ -74,6 +83,13 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
         symbolTable.increaseFirstFreeAddress();
         procedureStartEndInAssembly.insert({"multiply", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures +  Arithmetics::asmMultiplySize)});
         asmCommandsInProcedures += Arithmetics::asmMultiplySize;
+    }
+    else if (isDivOrMod)
+    {
+        Arithmetics::rtntAddressDivide = symbolTable.getFirstFreeAddress();
+        symbolTable.increaseFirstFreeAddress();
+        procedureStartEndInAssembly.insert({"divide", std::make_pair<int, int>(asmCommandsInProcedures + 1, asmCommandsInProcedures +  Arithmetics::asmDivideSize)});
+        asmCommandsInProcedures += Arithmetics::asmDivideSize;
     }
 
     // executeing commands in program
@@ -94,6 +110,11 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     if (isMultiply)
     {
         auto tempVec = Arithmetics::multiply();
+        procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
+    }
+    else if (isDivOrMod)
+    {
+        auto tempVec = Arithmetics::divide();
         procedureCommands.insert(procedureCommands.end(), std::make_move_iterator(tempVec.begin()), std::make_move_iterator(tempVec.end()));
     }
     

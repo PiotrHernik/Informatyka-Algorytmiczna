@@ -1,9 +1,13 @@
 PROGRAM IS
 x, y, z[-10:10]
 BEGIN
-x:= 6;
-y := -3;
-z[0] := x * y;
+x:= 47;
+y := 6;
+z[0] := x / y;
+z[1] := y / x;
+z[2] := y % x;
 WRITE z[0];
+WRITE z[1];
+WRITE z[2];
 
 END

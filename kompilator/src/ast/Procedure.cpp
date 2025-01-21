@@ -114,3 +114,18 @@ bool Procedure::isMultiplication()
     }
     return false;
 }
+
+bool Procedure::isDivOrMod()
+{
+    for(auto& command : commands)
+    {
+        if (auto commandAssign = std::dynamic_pointer_cast<CommandAssign>(command))
+        {
+            if (commandAssign->expression->expEnum == ExpressionEnum::DIV || commandAssign->expression->expEnum == ExpressionEnum::MOD)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}

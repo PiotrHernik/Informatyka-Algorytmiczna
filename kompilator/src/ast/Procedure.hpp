@@ -28,6 +28,7 @@ struct Procedure : Node
     std::vector<std::string> getProceduresNameCalled() const;
     int countAsmCommand(std::vector<std::shared_ptr<Procedure>>&);
     bool isMultiplication();
+    bool isDivOrMod();
 
     std::shared_ptr<ProcHead> procHead;
     std::vector<std::shared_ptr<Declaration>> declarations;
