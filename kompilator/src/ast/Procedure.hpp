@@ -29,6 +29,7 @@ struct Procedure : Node
     int countAsmCommand(std::vector<std::shared_ptr<Procedure>>&);
     bool isMultiplication();
     bool isDivOrMod();
+    void setLocation(int, int) override;
 
     std::shared_ptr<ProcHead> procHead;
     std::vector<std::shared_ptr<Declaration>> declarations;

@@ -17,8 +17,8 @@ END
 PROGRAM IS
 x, y, z[-2:10]
 BEGIN
-
-abc(x,y,z);
+x := -9223372036854775808;
+WRITE x;
 
 
 

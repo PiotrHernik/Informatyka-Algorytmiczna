@@ -28,6 +28,8 @@ public:
     SymbolTable& operator=(const SymbolTable&) = default; // Operator przypisania kopiującego
     SymbolTable& operator=(SymbolTable&&) noexcept = default; // Operator przypisania przenoszącego
     bool isInitialized(std::string);
+    void setAsInitialized(std::string);
+    
     bool isDeclared(std::string, DeclarationEnum);
     bool isArgument(std::string, DeclarationEnum);
     void addArgs(std::shared_ptr<ArgsDeclaration>);
@@ -70,6 +72,8 @@ private:
 
     std::set<std::string> iterators;
     std::unordered_map<std::string, long long> interator_address;
+
+    std::unordered_map<std::string, bool> initializedDeclarations;
 
     std::string membership; // it's need to know if it is a main program or a procedure
 

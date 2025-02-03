@@ -6,3 +6,9 @@ Condition::Condition(std::shared_ptr<Value> val1, std::shared_ptr<Value> val2, C
 std::string Condition::doAsm() const{
     return std::string("Condition");
 }
+
+void Condition::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
+}

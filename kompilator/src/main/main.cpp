@@ -17,7 +17,6 @@ int main(int argc, char const *argv[])
 
     const char* input_file = argv[1];
     auto output_file = argv[2];
-    // ool debug_flag = (argc == 3) && (std::strcmp(argv[2], "-d") == 0);
 
     // Otwórz plik wejściowy
     std::ifstream inputFile(input_file);

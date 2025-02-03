@@ -14,3 +14,9 @@ void ProcHead::fillSymbolTable(SymbolTable& symbTab){
         symbTab.addArgs(arg);
     }
 }
+
+void ProcHead::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
+}

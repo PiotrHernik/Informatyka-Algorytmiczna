@@ -1,0 +1,15 @@
+#Bartek Łabuz
+#pragma test in(-97, 0) out(5044)
+PROGRAM IS
+    x, y, a[-100:-80]
+BEGIN
+    READ x;
+    READ y;
+    a[x] := -3;
+    a[-100] := 100;
+    FOR i FROM a[x] TO a[-100] DO
+        y := y + i;
+    ENDFOR
+
+    WRITE y;
+END

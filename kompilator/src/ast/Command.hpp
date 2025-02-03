@@ -24,6 +24,7 @@ struct Command : Node
     virtual bool isMultiplication() = 0;
     virtual bool isDivOrMod() = 0;
     virtual std::string ifIsProcCallGetName() = 0;
+    void setLocation(int, int) override;
 
     CommandEnum commandEnum;
 };

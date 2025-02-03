@@ -4,6 +4,7 @@
 #include "../ast/Enums.hpp"
 #include "../ast/Declaration.hpp"
 #include "../ast/ArgsDeclaration.hpp"
+#include "../ErrorClass/Error.hpp"
 
 
 long long SymbolTable::firstFreeAddress = 100;
@@ -63,7 +64,26 @@ bool SymbolTable::isDeclared(std::string name, DeclarationEnum declEnum)
     return true;
 }
 
-bool SymbolTable::isInitialized(std::string) {return false;}
+bool SymbolTable::isInitialized(std::string name)
+{
+    if (isArgument(name, DeclarationEnum::PID))
+    {
+        return true;
+    }
+
+    if (isIterator(name))
+    {
+        return true;
+    }
+    std::cout << "Sprawdzam czy zmienna: " << name << "  jest zainicjalizowana, wynik to: " << initializedDeclarations[name] << std::endl;
+    return initializedDeclarations[name];    
+}
+
+void SymbolTable::setAsInitialized(std::string name)
+{
+    std::cout << "Ustawiam zmienną: " << name << " jako zainicjalizowaną " << std::endl;
+    initializedDeclarations[name] = true;
+}
 
 void SymbolTable::addDeclarations(std::shared_ptr<Declaration> decl)
 {
@@ -72,12 +92,14 @@ void SymbolTable::addDeclarations(std::shared_ptr<Declaration> decl)
         if (declarations.find(decl->name) != declarations.end() || 
             arguments.find(decl->name) != arguments.end())
         {
-            throw std::invalid_argument("Redeclaration second in declaration");
+            std::string errMsg = "Redeclaration second in declaration, " + std::to_string(decl->line) + ":" + std::to_string(decl->column);
+            Error err(errMsg);
+            err.notifyError();
         }
 
         declarations.insert(decl->name);
+        initializedDeclarations.insert({decl->name, false});
         declaration_adress.insert({decl->name, firstFreeAddress});
-        std::cout << "Declaration: " << decl->name << ", in address: " <<firstFreeAddress << std::endl;
         firstFreeAddress++;
     }
     else if(decl->decEnum == DeclarationEnum::TABLE)
@@ -85,7 +107,9 @@ void SymbolTable::addDeclarations(std::shared_ptr<Declaration> decl)
         if (declaration_tables.find(decl->name) != declaration_tables.end() || 
             arguments_tables.find(decl->name) != arguments_tables.end())
         {
-            throw std::invalid_argument("Redeclaration second in declaration");
+            std::string errMsg = "Redeclaration second in declaration, " + std::to_string(decl->line) + ":" + std::to_string(decl->column);
+            Error err(errMsg);
+            err.notifyError();
         }
 
         auto size = decl->num2 - decl->num1 + 1;
@@ -96,7 +120,12 @@ void SymbolTable::addDeclarations(std::shared_ptr<Declaration> decl)
         size_and_offset_declaration_tables.insert({decl->name, std::make_pair(size, offset)});
         firstFreeAddress += size;
     }
-    else throw std::invalid_argument("Type of Declaration is wrong");
+    else 
+    {
+        std::string errMsg = "Type of Declaration is wrong";
+        Error err(errMsg);
+        err.notifyError();
+    }
 }
 
 void SymbolTable::addArgs(std::shared_ptr<ArgsDeclaration> argsDecl)
@@ -105,7 +134,9 @@ void SymbolTable::addArgs(std::shared_ptr<ArgsDeclaration> argsDecl)
     {
         if (arguments.find(argsDecl->name) != arguments.end())
         {
-            throw std::invalid_argument("Redeclaration");
+            std::string errMsg = "Redeclaration, " + std::to_string(argsDecl->line) + ":" + std::to_string(argsDecl->column);
+            Error err(errMsg);
+            err.notifyError();
         }
         
         arguments.insert(argsDecl->name);
@@ -116,14 +147,21 @@ void SymbolTable::addArgs(std::shared_ptr<ArgsDeclaration> argsDecl)
     {
         if (arguments_tables.find(argsDecl->name) != arguments_tables.end())
         {
-            throw std::invalid_argument("Redeclaration");
+            std::string errMsg = "Redeclaration, " + std::to_string(argsDecl->line) + ":" + std::to_string(argsDecl->column);
+            Error err(errMsg);
+            err.notifyError();
         }
 
         arguments_tables.insert(argsDecl->name);
         arg_tab_address.insert({argsDecl->name, firstFreeAddress});
         ++firstFreeAddress;
     }
-    else throw std::invalid_argument("Type of Declaration is wrong");
+    else 
+    {
+        std::string errMsg = "Type of Declaration is wrong";
+        Error err(errMsg);
+        err.notifyError();
+    }
 }
 
 void SymbolTable::printAllDeclAndArgs()
@@ -175,11 +213,15 @@ long long SymbolTable::getTableAddress(std::string name, long long num)
         auto [size, offset] = size_and_offset_declaration_tables[name];
         if (num < offset)
         {
-            throw std::invalid_argument("Out of downbound");
+            std::string errMsg = "Out of downbound in table named: " + name;
+            Error err(errMsg);
+            err.notifyError();
         }
         else if (num > size + offset - 1)
         {
-            throw std::invalid_argument("Out of upperbound");
+            std::string errMsg = "Out of downbound in table named: " + name;
+            Error err(errMsg);
+            err.notifyError();
         }
         return tableBegin - offset + num;
     }
@@ -238,7 +280,11 @@ long long SymbolTable::getArgTableAddressForProcCall(std::string& name)
 std::pair<long long, long long> SymbolTable::addIterator(std::string itName)
 {
     if(iterators.find(itName) != iterators.end())
-        throw std::invalid_argument("Iterator with this name is used");
+    {
+        std::string errMsg = "Iterator with this name is used";
+        Error err(errMsg);
+        err.notifyError();
+    }
 
     iterators.insert(itName);
     interator_address.insert({itName, firstFreeAddress});
@@ -276,7 +322,6 @@ void SymbolTable::addArgsAddress(std::string& argument, long long address, ArgsD
         {
             argument_adress_for_procCall[argument].push_back(address);
         }
-        std::cout << "Adding arg: " <<argument << ", with address: " <<address <<std::endl;
     }
     else
     {

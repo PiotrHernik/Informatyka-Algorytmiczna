@@ -8,6 +8,7 @@
 #include "../ast/Value.hpp"
 #include "../ast/Enums.hpp"
 #include "validIdentifier.hpp"
+#include "../ErrorClass/Error.hpp"
 
 std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr<Value> value2, bool isInFor)
 {
@@ -23,11 +24,20 @@ std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr
     {
         if (!symbolTable.isIterator(value2->identifier->name1) || value2->identifier->idEnum != IdentifierEnum::PID)
         {
-            throw std::invalid_argument("Undeclared argument9");
+            std::string errMsg = "Undeclared argument" + std::to_string(value2->identifier->line) + ":" + std::to_string(value2->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
         }
     }
 
     if (value2->identifier->idEnum == IdentifierEnum::PID) {
+        if (!symbolTable.isInitialized(value2->identifier->name1))
+        {
+            auto errMsg = "Identifier: " + value2->identifier->name1 + " is not initialized " + std::to_string(value2->identifier->line) + ":" + std::to_string(value2->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
+        }
+
         if (symbolTable.isArgument(value2->identifier->name1, DeclarationEnum::PID))
         {
             asmCommands.push_back("    LOADI " + 
@@ -56,6 +66,12 @@ std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr
         asmCommands.push_back("    STORE 10");
     } 
     else if (value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
+        if (!symbolTable.isInitialized(value2->identifier->name2))
+        {
+            auto errMsg = "Identifier: " + value2->identifier->name2 + " is not initialized " + std::to_string(value2->identifier->line) + ":" + std::to_string(value2->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
+        }
         if (symbolTable.isArgument(value2->identifier->name1, DeclarationEnum::TABLE))
         {
             asmCommands.push_back("    LOAD " + 

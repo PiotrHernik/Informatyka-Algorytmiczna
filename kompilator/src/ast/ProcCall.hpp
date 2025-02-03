@@ -11,6 +11,7 @@ struct ProcCall : Node
 {
     ProcCall(std::string, std::vector<std::shared_ptr<Args>>);
     std::string doAsm() const override;
+    void setLocation(int, int) override;
 
     std::string name;
     std::vector<std::shared_ptr<Args>> args;

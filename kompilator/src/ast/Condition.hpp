@@ -12,6 +12,7 @@ struct Condition : Node
 {
     Condition(std::shared_ptr<Value> value1, std::shared_ptr<Value> value2, ConditionEnum condEnum);
     std::string doAsm() const override;
+    void setLocation(int, int) override;
     
     ConditionEnum condEnum;
     std::shared_ptr<Value> value1;

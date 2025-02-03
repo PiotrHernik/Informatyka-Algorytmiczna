@@ -14,6 +14,7 @@ struct ProcHead : Node
     ProcHead(std::string, std::vector<std::shared_ptr<ArgsDeclaration>>);
     std::string doAsm() const override;
     void fillSymbolTable(SymbolTable& symbTab);
+    void setLocation(int, int) override;
 
     std::string name;
     std::vector<std::shared_ptr<ArgsDeclaration>> argsDecl;

@@ -9,3 +9,9 @@ Expression::Expression(std::shared_ptr<Value> value1, std::shared_ptr<Value> val
 std::string Expression::doAsm() const{
     return std::string("Expression");
 }
+
+void Expression::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
+}

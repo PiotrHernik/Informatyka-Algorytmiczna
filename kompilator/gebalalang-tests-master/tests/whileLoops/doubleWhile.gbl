@@ -1,0 +1,18 @@
+#Bartek Łabuz
+# in =; out = 171700
+#pragma test in(1, 0) out(171700)
+PROGRAM IS
+    i, j, s
+BEGIN
+    READ i;
+    READ s;
+    WHILE i <= 100 DO
+        j := 1;
+        WHILE j <= i DO
+            s := s + j;
+            j := j + 1;
+        ENDWHILE
+        i := i + 1;
+    ENDWHILE
+    WRITE s;
+END

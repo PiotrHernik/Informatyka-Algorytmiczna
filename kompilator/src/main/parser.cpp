@@ -858,7 +858,7 @@ namespace yy {
 
   case 3: // procedures: procedures KW_PROCEDURE proc_head KW_IS declarations KW_BEGIN commands KW_END
 #line 108 "main/parser.ypp"
-                                                                                      { yylhs.value.as < std::vector<std::shared_ptr<Procedure>> > () = makeProcedures(yystack_[7].value.as < std::vector<std::shared_ptr<Procedure>> > (), std::move(yystack_[5].value.as < std::shared_ptr<ProcHead> > ()), yystack_[3].value.as < std::vector<std::shared_ptr<Declaration>> > (), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > (), ProcedureEnum::WITHDECLARATION);}
+                                                                                      { yylhs.value.as < std::vector<std::shared_ptr<Procedure>> > () = makeProcedures(yystack_[7].value.as < std::vector<std::shared_ptr<Procedure>> > (), std::move(yystack_[5].value.as < std::shared_ptr<ProcHead> > ()), yystack_[3].value.as < std::vector<std::shared_ptr<Declaration>> > (), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > (), ProcedureEnum::WITHDECLARATION); }
 #line 863 "main/parser.cpp"
     break;
 
@@ -900,73 +900,73 @@ namespace yy {
 
   case 10: // command: identifier ASSIGN expression SEMICOLON
 #line 122 "main/parser.ypp"
-                                               { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandAssign>(std::move(yystack_[3].value.as < std::shared_ptr<Identifier> > ()), std::move(yystack_[1].value.as < std::shared_ptr<Expression> > ())); }
+                                               { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandAssign>(std::move(yystack_[3].value.as < std::shared_ptr<Identifier> > ()), std::move(yystack_[1].value.as < std::shared_ptr<Expression> > ())); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[3].location.begin.line, yystack_[3].location.begin.column); }
 #line 905 "main/parser.cpp"
     break;
 
   case 11: // command: KW_IF condition KW_THEN commands KW_ENDIF
 #line 123 "main/parser.ypp"
-                                                    { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandIf>(std::move(yystack_[3].value.as < std::shared_ptr<Condition> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); }
+                                                    { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandIf>(std::move(yystack_[3].value.as < std::shared_ptr<Condition> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[4].location.begin.line, yystack_[4].location.begin.column); }
 #line 911 "main/parser.cpp"
     break;
 
   case 12: // command: KW_IF condition KW_THEN commands KW_ELSE commands KW_ENDIF
 #line 124 "main/parser.ypp"
-                                                                     { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandIfElse>(std::move(yystack_[5].value.as < std::shared_ptr<Condition> > ()), yystack_[3].value.as < std::vector<std::shared_ptr<Command>> > (), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); }
+                                                                     { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandIfElse>(std::move(yystack_[5].value.as < std::shared_ptr<Condition> > ()), yystack_[3].value.as < std::vector<std::shared_ptr<Command>> > (), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[6].location.begin.line, yystack_[6].location.begin.column); }
 #line 917 "main/parser.cpp"
     break;
 
   case 13: // command: KW_WHILE condition KW_DO commands KW_ENDWHILE
 #line 125 "main/parser.ypp"
-                                                        { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandWhile>(std::move(yystack_[3].value.as < std::shared_ptr<Condition> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); }
+                                                        { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandWhile>(std::move(yystack_[3].value.as < std::shared_ptr<Condition> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[4].location.begin.line, yystack_[4].location.begin.column); }
 #line 923 "main/parser.cpp"
     break;
 
   case 14: // command: KW_REPEAT commands KW_UNTIL condition SEMICOLON
 #line 126 "main/parser.ypp"
-                                                          { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandRepeat>(yystack_[3].value.as < std::vector<std::shared_ptr<Command>> > (), std::move(yystack_[1].value.as < std::shared_ptr<Condition> > ())); }
+                                                          { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandRepeat>(yystack_[3].value.as < std::vector<std::shared_ptr<Command>> > (), std::move(yystack_[1].value.as < std::shared_ptr<Condition> > ())); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[4].location.begin.line, yystack_[4].location.begin.column); }
 #line 929 "main/parser.cpp"
     break;
 
   case 15: // command: KW_FOR PIDENTIFIER KW_FROM value KW_TO value KW_DO commands KW_ENDFOR
 #line 127 "main/parser.ypp"
-                                                                                { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandForTo>(yystack_[7].value.as < std::string > (), std::move(yystack_[5].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[3].value.as < std::shared_ptr<Value> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); }
+                                                                                { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandForTo>(yystack_[7].value.as < std::string > (), std::move(yystack_[5].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[3].value.as < std::shared_ptr<Value> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[8].location.begin.line, yystack_[8].location.begin.column); }
 #line 935 "main/parser.cpp"
     break;
 
   case 16: // command: KW_FOR PIDENTIFIER KW_FROM value KW_DOWNTO value KW_DO commands KW_ENDFOR
 #line 128 "main/parser.ypp"
-                                                                                    { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandDownTo>(yystack_[7].value.as < std::string > (), std::move(yystack_[5].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[3].value.as < std::shared_ptr<Value> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); }
+                                                                                    { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandDownTo>(yystack_[7].value.as < std::string > (), std::move(yystack_[5].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[3].value.as < std::shared_ptr<Value> > ()), yystack_[1].value.as < std::vector<std::shared_ptr<Command>> > ()); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[8].location.begin.line, yystack_[8].location.begin.column); }
 #line 941 "main/parser.cpp"
     break;
 
   case 17: // command: proc_call SEMICOLON
 #line 129 "main/parser.ypp"
-                              { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandProcCall>(std::move(yystack_[1].value.as < std::shared_ptr<ProcCall> > ())); }
+                              { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandProcCall>(std::move(yystack_[1].value.as < std::shared_ptr<ProcCall> > ())); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[1].location.begin.line, yystack_[1].location.begin.column); }
 #line 947 "main/parser.cpp"
     break;
 
   case 18: // command: KW_READ identifier SEMICOLON
 #line 130 "main/parser.ypp"
-                                       { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandRead>(std::move(yystack_[1].value.as < std::shared_ptr<Identifier> > ())); }
+                                       { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandRead>(std::move(yystack_[1].value.as < std::shared_ptr<Identifier> > ())); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 953 "main/parser.cpp"
     break;
 
   case 19: // command: KW_WRITE value SEMICOLON
 #line 131 "main/parser.ypp"
-                                   { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandWrite>(std::move(yystack_[1].value.as < std::shared_ptr<Value> > ())); }
+                                   { yylhs.value.as < std::shared_ptr<Command> > () = std::make_shared<CommandWrite>(std::move(yystack_[1].value.as < std::shared_ptr<Value> > ())); yylhs.value.as < std::shared_ptr<Command> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 959 "main/parser.cpp"
     break;
 
   case 20: // proc_head: PIDENTIFIER LPRNT args_decl RPRNT
 #line 134 "main/parser.ypp"
-                                          { yylhs.value.as < std::shared_ptr<ProcHead> > () = makeProcHead(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::vector<std::shared_ptr<ArgsDeclaration>> > ()); }
+                                          { yylhs.value.as < std::shared_ptr<ProcHead> > () = makeProcHead(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::vector<std::shared_ptr<ArgsDeclaration>> > ()); yylhs.value.as < std::shared_ptr<ProcHead> > ()->setLocation(yystack_[3].location.begin.line, yystack_[3].location.begin.column); }
 #line 965 "main/parser.cpp"
     break;
 
   case 21: // proc_call: PIDENTIFIER LPRNT args RPRNT
 #line 137 "main/parser.ypp"
-                                     { yylhs.value.as < std::shared_ptr<ProcCall> > () = makeProcCall(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::vector<std::shared_ptr<Args>> > ()); }
+                                     { yylhs.value.as < std::shared_ptr<ProcCall> > () = makeProcCall(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::vector<std::shared_ptr<Args>> > ()); yylhs.value.as < std::shared_ptr<ProcCall> > ()->setLocation(yystack_[3].location.begin.line, yystack_[3].location.begin.column); }
 #line 971 "main/parser.cpp"
     break;
 
@@ -1020,97 +1020,97 @@ namespace yy {
 
   case 30: // args: args COMMA PIDENTIFIER
 #line 152 "main/parser.ypp"
-                               { yylhs.value.as < std::vector<std::shared_ptr<Args>> > () = makeArgs(yystack_[2].value.as < std::vector<std::shared_ptr<Args>> > (), yystack_[0].value.as < std::string > ()); }
+                               { yylhs.value.as < std::vector<std::shared_ptr<Args>> > () = makeArgs(yystack_[2].value.as < std::vector<std::shared_ptr<Args>> > (), yystack_[0].value.as < std::string > (), yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1025 "main/parser.cpp"
     break;
 
   case 31: // args: PIDENTIFIER
 #line 153 "main/parser.ypp"
-                      { yylhs.value.as < std::vector<std::shared_ptr<Args>> > () = makeArgs(yystack_[0].value.as < std::string > ()); }
+                      { yylhs.value.as < std::vector<std::shared_ptr<Args>> > () = makeArgs(yystack_[0].value.as < std::string > (), yystack_[0].location.begin.line, yystack_[0].location.begin.column); }
 #line 1031 "main/parser.cpp"
     break;
 
   case 32: // expression: value
 #line 156 "main/parser.ypp"
-              { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::VALUE); }
+              { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::VALUE); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[0].location.begin.line, yystack_[0].location.begin.column); }
 #line 1037 "main/parser.cpp"
     break;
 
   case 33: // expression: value PLUS value
 #line 157 "main/parser.ypp"
-                           { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::PLUS); }
+                           { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::PLUS); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1043 "main/parser.cpp"
     break;
 
   case 34: // expression: value MINUS value
 #line 158 "main/parser.ypp"
-                            { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MINUS); }
+                            { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MINUS); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1049 "main/parser.cpp"
     break;
 
   case 35: // expression: value MULT value
 #line 159 "main/parser.ypp"
-                           { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MULT); }
+                           { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MULT); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1055 "main/parser.cpp"
     break;
 
   case 36: // expression: value DIV value
 #line 160 "main/parser.ypp"
-                          { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::DIV); }
+                          { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::DIV); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1061 "main/parser.cpp"
     break;
 
   case 37: // expression: value MOD value
 #line 161 "main/parser.ypp"
-                          { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MOD); }
+                          { yylhs.value.as < std::shared_ptr<Expression> > () = std::make_shared<Expression>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ExpressionEnum::MOD); yylhs.value.as < std::shared_ptr<Expression> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1067 "main/parser.cpp"
     break;
 
   case 38: // condition: value EQUAL value
 #line 164 "main/parser.ypp"
-                          { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::EQUAL); }
+                          { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::EQUAL); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1073 "main/parser.cpp"
     break;
 
   case 39: // condition: value NEQUAL value
 #line 165 "main/parser.ypp"
-                             { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::NOTEQUAL); }
+                             { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::NOTEQUAL); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1079 "main/parser.cpp"
     break;
 
   case 40: // condition: value MORE value
 #line 166 "main/parser.ypp"
-                           { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::MORE); }
+                           { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::MORE); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1085 "main/parser.cpp"
     break;
 
   case 41: // condition: value LESS value
 #line 167 "main/parser.ypp"
-                           { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::LESS); }
+                           { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::LESS); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1091 "main/parser.cpp"
     break;
 
   case 42: // condition: value MOREOREQUAL value
 #line 168 "main/parser.ypp"
-                                  { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::MOREOREQUAL); }
+                                  { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::MOREOREQUAL); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1097 "main/parser.cpp"
     break;
 
   case 43: // condition: value LESSOREQUAL value
 #line 169 "main/parser.ypp"
-                                  { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::LESSOREQUAL); }
+                                  { yylhs.value.as < std::shared_ptr<Condition> > () = std::make_shared<Condition>(std::move(yystack_[2].value.as < std::shared_ptr<Value> > ()), std::move(yystack_[0].value.as < std::shared_ptr<Value> > ()), ConditionEnum::LESSOREQUAL); yylhs.value.as < std::shared_ptr<Condition> > ()->setLocation(yystack_[2].location.begin.line, yystack_[2].location.begin.column); }
 #line 1103 "main/parser.cpp"
     break;
 
   case 44: // value: number
 #line 172 "main/parser.ypp"
-               { yylhs.value.as < std::shared_ptr<Value> > () = std::make_shared<Value>(yystack_[0].value.as < long long > (), ValueEnum::NUM); }
+               { yylhs.value.as < std::shared_ptr<Value> > () = std::make_shared<Value>(yystack_[0].value.as < long long > (), ValueEnum::NUM); yylhs.value.as < std::shared_ptr<Value> > ()->setLocation(yystack_[0].location.begin.line, yystack_[0].location.begin.column); }
 #line 1109 "main/parser.cpp"
     break;
 
   case 45: // value: identifier
 #line 173 "main/parser.ypp"
-                     { yylhs.value.as < std::shared_ptr<Value> > () = std::make_shared<Value>(std::move(yystack_[0].value.as < std::shared_ptr<Identifier> > ()), ValueEnum::ID); }
+                     { yylhs.value.as < std::shared_ptr<Value> > () = std::make_shared<Value>(std::move(yystack_[0].value.as < std::shared_ptr<Identifier> > ()), ValueEnum::ID); yylhs.value.as < std::shared_ptr<Value> > ()->setLocation(yystack_[0].location.begin.line, yystack_[0].location.begin.column); }
 #line 1115 "main/parser.cpp"
     break;
 
@@ -1128,19 +1128,19 @@ namespace yy {
 
   case 48: // identifier: PIDENTIFIER
 #line 180 "main/parser.ypp"
-                    { yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[0].value.as < std::string > (), IdentifierEnum::PID); }
+                    { yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[0].value.as < std::string > (), IdentifierEnum::PID); yylhs.value.as < std::shared_ptr<Identifier> > ()->setLocation(yystack_[0].location.begin.line, yystack_[0].location.begin.column); }
 #line 1133 "main/parser.cpp"
     break;
 
   case 49: // identifier: PIDENTIFIER LBRACKET number RBRACKET
 #line 181 "main/parser.ypp"
-                                               {  yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[3].value.as < std::string > (), yystack_[1].value.as < long long > (), IdentifierEnum::PIDT); }
+                                               {  yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[3].value.as < std::string > (), yystack_[1].value.as < long long > (), IdentifierEnum::PIDT); yylhs.value.as < std::shared_ptr<Identifier> > ()->setLocation(yystack_[3].location.begin.line, yystack_[3].location.begin.column); }
 #line 1139 "main/parser.cpp"
     break;
 
   case 50: // identifier: PIDENTIFIER LBRACKET PIDENTIFIER RBRACKET
 #line 182 "main/parser.ypp"
-                                                    {  yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::string > (), IdentifierEnum::PIDTPID); }
+                                                    {  yylhs.value.as < std::shared_ptr<Identifier> > () = std::make_shared<Identifier>(yystack_[3].value.as < std::string > (), yystack_[1].value.as < std::string > (), IdentifierEnum::PIDTPID); yylhs.value.as < std::shared_ptr<Identifier> > ()->setLocation(yystack_[3].location.begin.line, yystack_[3].location.begin.column); }
 #line 1145 "main/parser.cpp"
     break;
 

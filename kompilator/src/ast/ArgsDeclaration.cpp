@@ -6,3 +6,9 @@ ArgsDeclaration::ArgsDeclaration(std::string name, ArgsDeclarationEnum argsDecEn
 std::string ArgsDeclaration::doAsm() const {
     return std::string("ArgsDec");
 }
+
+void ArgsDeclaration::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
+}

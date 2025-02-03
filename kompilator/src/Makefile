@@ -39,7 +39,8 @@ SRC = $(SRC_DIR)/main.cpp \
       $(UTILITIES_DIR)/makeIdentifier.cpp \
       $(UTILITIES_DIR)/makeProcCall.cpp \
       $(UTILITIES_DIR)/makeProcedures.cpp \
-      $(UTILITIES_DIR)/makeProcHead.cpp 
+      $(UTILITIES_DIR)/makeProcHead.cpp \
+      ErrorClass/Error.cpp
 
 # Pliki Flex i Bison
 FLEX_SOURCE = $(SRC_DIR)/scanner.lpp

@@ -1,4 +1,5 @@
 #include "Identifier.hpp"
+#include <iostream>
 
 Identifier::Identifier(std::string pid, IdentifierEnum idEnum) : name1(pid), idEnum(idEnum)
 {
@@ -11,4 +12,10 @@ Identifier::Identifier(std::string pid, long long num, IdentifierEnum idEnum) : 
 }
 std::string Identifier::doAsm() const{
     return std::string("Identifier");
+}
+
+void Identifier::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
 }

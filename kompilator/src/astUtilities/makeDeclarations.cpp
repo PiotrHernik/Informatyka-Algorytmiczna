@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "makeDeclarations.hpp"
+#include "../ErrorClass/Error.hpp"
 
 std::vector<std::shared_ptr<Declaration>> makeDeclaration(const std::string name, std::initializer_list<long long> list)
 {
@@ -12,7 +13,11 @@ std::vector<std::shared_ptr<Declaration>> makeDeclaration(const std::string name
         vec.push_back(std::make_shared<Declaration>(name, DeclarationEnum::TABLE, *it, *(it+1)));
     }
     else
-        throw std::invalid_argument("Ivalid number of arguments");
+    {
+        std::string errMsg = "Ivalid number of arguments";
+        Error err(errMsg);
+        err.notifyError();
+    }
     return vec;
 }
 
@@ -27,7 +32,11 @@ std::vector<std::shared_ptr<Declaration>> makeDeclaration(
         auto it = list.begin();
         vec.push_back(std::make_shared<Declaration>(name, DeclarationEnum::TABLE, *it, *(it+1)));
     }
-    else 
-        throw std::invalid_argument("Invalid number of argument");
+    else
+    {
+        std::string errMsg = "Ivalid number of arguments";
+        Error err(errMsg);
+        err.notifyError();
+    }
     return vec;
 }

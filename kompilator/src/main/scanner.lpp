@@ -66,17 +66,23 @@
 ":"                 { return yy::Parser::make_COLON(loc); }
 ";"                 { return yy::Parser::make_SEMICOLON(loc); }
 [_a-z]+             { return yy::Parser::make_PIDENTIFIER(YYText(), loc); }
+-9223372036854775808 { try {
+                            return yy::Parser::make_NUM(std::stoll(YYText()), loc); 
+                            }
+                        catch(const std::out_of_range&){
+                            std::cerr << "Number out of range for long long " <<  yylineno  << std::endl;
+                        } }
 [0-9]+              { try {
                             return yy::Parser::make_NUM(std::stoll(YYText()), loc); 
                             }
                         catch(const std::out_of_range&){
                             std::cerr << "Number out of range for long long " <<  yylineno  << std::endl;
                         }}
-\n                  { }
+\n                  { loc.lines(1); loc.step(); }
 "#".*                // Ignoruj komentarze lub nowe linie
 [ \t]+              { loc.step(); } // Ignoruj białe znaki
 <<EOF>>             { return yy::Parser::make_YYEOF(loc); }
-.                   { loc.step(); } // Ignoruj inne znaki
+.                   { return yy::Parser::make_YYUNDEF(loc); } // Ignoruj inne znaki
 
 
 %%

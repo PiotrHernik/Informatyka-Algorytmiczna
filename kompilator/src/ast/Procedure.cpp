@@ -102,7 +102,6 @@ std::vector<std::string> Procedure::getProceduresNameCalled() const
 
 bool Procedure::isMultiplication()
 {
-    std::cout << "Proceduares isMultiplication " <<std::endl;
     for(auto& command : commands)
     {
         if (command->isMultiplication())
@@ -123,4 +122,10 @@ bool Procedure::isDivOrMod()
         }  
     }
     return false;
+}
+
+void Procedure::setLocation(int lin, int col)
+{
+    line = lin;
+    column = col;
 }

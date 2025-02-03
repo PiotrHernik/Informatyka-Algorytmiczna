@@ -7,6 +7,7 @@
 #include "../ast/Identifier.hpp"
 #include "../ast/Value.hpp"
 #include "../ast/Enums.hpp"
+#include "../ErrorClass/Error.hpp"
 #include "validIdentifier.hpp"
 
 std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr<Value> value1, bool isInFor)
@@ -22,11 +23,20 @@ std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr
     {
         if (!symbolTable.isIterator(value1->identifier->name1) || value1->identifier->idEnum != IdentifierEnum::PID)
         {
-            throw std::invalid_argument("Undeclared argument");
+            std::string errMsg = "Undeclared argument" + std::to_string(value1->identifier->line) + ":" + std::to_string(value1->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
         }
     }
 
     if (value1->identifier->idEnum == IdentifierEnum::PID) {
+        if (!symbolTable.isInitialized(value1->identifier->name1))
+        {
+            auto errMsg = "Identifier: " + value1->identifier->name1 + " is not initialized " + std::to_string(value1->identifier->line) + ":" + std::to_string(value1->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
+        }
+        
         if (symbolTable.isArgument(value1->identifier->name1, DeclarationEnum::PID))
             asmCommands.push_back("    LOADI " + 
                               std::to_string(symbolTable.getPidAddress(value1->identifier->name1, isInFor)));
@@ -50,6 +60,13 @@ std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr
         }
     } 
     else if (value1->identifier->idEnum == IdentifierEnum::PIDTPID) {
+        if (!symbolTable.isInitialized(value1->identifier->name2))
+        {
+            auto errMsg = "Identifier: " + value1->identifier->name2 + " is not initialized " + std::to_string(value1->identifier->line) + ":" + std::to_string(value1->identifier->column);
+            Error err(errMsg);
+            err.notifyError();
+        }
+
         if (symbolTable.isArgument(value1->identifier->name1, DeclarationEnum::TABLE))
         {
             asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
