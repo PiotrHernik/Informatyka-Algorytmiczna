@@ -1,0 +1,4 @@
+name = "blocksys"
+uuid = "e31b9754-9959-4a5e-a557-1386760acf88"
+authors = ["PiotrHernik <piotr.hernik13@gmail.com>"]
+version = "0.1.0"
