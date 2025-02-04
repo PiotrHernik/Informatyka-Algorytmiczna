@@ -1,5 +1,5 @@
 # Nazwa projektu
-TARGET = compiler
+TARGET = kompilator
 
 # Kompilator i flagi
 CXX = g++
@@ -9,7 +9,6 @@ CXXFLAGS = -std=c++17 -I./src/astUtilities -I./src/ast -I./src/functions -I./src
 SRC_DIR = main
 AST_DIR = ast
 FUNCTIONS_DIR = functions
-COMMANDS_DIR = astUtilities/commandsUtilities
 UTILITIES_DIR = astUtilities
 
 # Pliki źródłowe

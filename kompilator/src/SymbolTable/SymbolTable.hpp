@@ -7,8 +7,6 @@
 #include <string>
 #include <fstream>
 
-// #include "../includs.hpp"
-
 enum class DeclarationEnum;
 enum class IdentifierEnum;
 enum class ArgsDeclarationEnum;

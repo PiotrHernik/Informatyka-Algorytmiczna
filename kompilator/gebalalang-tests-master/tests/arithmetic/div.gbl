@@ -1,0 +1,26 @@
+#Bartek Łabuz
+#pragma test in(153467, 72, -153467, -72) out( 2131, 35, -2132, 37, -2132, -37, 2131, -35)
+PROGRAM IS
+    a, b, c, d, a_, b_
+BEGIN
+    READ a ;
+    READ b ;
+    READ a_;
+    READ b_;
+    c := a / b;
+    d := a % b;
+    WRITE c;
+    WRITE d;
+    c := a_ / b;
+    d := a_ % b;
+    WRITE c;
+    WRITE d;
+    c := a / b_;
+    d := a % b_;
+    WRITE c;
+    WRITE d;
+    c := a_ / b_;
+    d := a_ % b_;
+    WRITE c;
+    WRITE d;
+END

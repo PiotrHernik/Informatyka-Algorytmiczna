@@ -1,0 +1,138 @@
+
+
+==================================================
+SECTION: BASIC
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                 arraySwap.gbl  Yes                       55              1731                           1131
+:              else_if_all0.gbl  Yes                      158              3417                           2017
+:              else_if_all1.gbl  Yes                      168              3808                           2408
+:                read_write.gbl  Yes                        4               201                              1
+:               read_write2.gbl  Yes                       96              1101                            801
+:                      test.gbl  Yes                       20               404                            304
+
+
+
+==================================================
+SECTION: FORLOOPS
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:               nestedLoop1.gbl  Yes                       51        1419493212                     1419493012
+:               simpleLoop2.gbl  Yes                       33             10270                           9970
+:                 upANDdown.gbl  Yes                       42           9824687                        9824487
+
+
+
+==================================================
+SECTION: REQUIRED
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                  example1.gbl  Yes                      333             10746                          10246
+:                  example2.gbl  Yes                       90              8872                           8472
+:                  example3.gbl  Yes                      126              1421                           1221
+:                  example4.gbl  Yes                      298             82264                          81964
+:                  example5.gbl  Yes                      290           1569002                        1568602
+:                  example6.gbl  Yes                      161             34887                          34587
+:                  example7.gbl  Yes                       62            524602                         524002
+:                  example8.gbl  Yes                      338             67120                          65520
+:                  example9.gbl  Yes                      278             32756                          32456
+:                  program0.gbl  Yes                      234              6538                           6271
+:                  program1.gbl  Yes                       74              7500                           7000
+:                  program2.gbl  Yes                      105             80053                          77553
+:                  program3.gbl  Yes                      289         151402171                      151401738
+
+
+
+==================================================
+SECTION: PROC
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                  forLoops.gbl  Yes                      183              5024                           4724
+:                    inline.gbl  Yes                       86              2683                           2383
+:                        it.gbl  No                         0                 0                              0
+:                      many.gbl  Yes                       41              1054                            854
+:                  weirdPtr.gbl  Yes                       55              1392                           1192
+
+
+
+==================================================
+SECTION: EXTRA_ERRORS
+==================================================
+Test Name                          Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+: error_array_out_of_bounds.gbl    Yes                        0                 0                              0
+:  error_for_loop_iter_read.gbl    Yes                        0                 0                              0
+: error_for_loop_iter_write.gbl    Yes                        0                 0                              0
+:error_invalid_procedure_args.gbl  Yes                        0                 0                              0
+:error_iterator_redeclaration.gbl  Yes                        0                 0                              0
+:error_iterator_to_procedure.gbl   Yes                        0                 0                              0
+:       error_uninitialized.gbl    Yes                        0                 0                              0
+: error_write_uninitialized.gbl    Yes                        0                 0                              0
+
+
+
+==================================================
+SECTION: ARITHMETIC
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                       div.gbl  Yes                      209             23631                          22431
+:                       mul.gbl  Yes                      119              7648                           6848
+:                   special.gbl  Yes                      233              1631                            931
+
+
+
+==================================================
+SECTION: REQUIRED_ERRORS
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                    error1.gbl  Yes                        0                 0                              0
+:                    error2.gbl  Yes                        0                 0                              0
+:                    error3.gbl  Yes                        0                 0                              0
+:                    error4.gbl  Yes                        0                 0                              0
+:                    error5.gbl  Yes                        0                 0                              0
+:                    error6.gbl  Yes                        0                 0                              0
+:                    error7.gbl  Yes                        0                 0                              0
+:                    error8.gbl  Yes                        0                 0                              0
+
+
+
+==================================================
+SECTION: CUSTOM
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:                    basic1.gbl  Yes                        5               301                              1
+:                    basic2.gbl  Yes                       96              1101                            801
+:                     proc1.gbl  Yes                       28               922                            622
+
+
+
+==================================================
+SECTION: WHILELOOPS
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:               doubleWhile.gbl  Yes                       34            946782                         946482
+:               littleGauss.gbl  Yes                       23             22724                          22624
+:                 moreLoops.gbl  Yes                       45           2383977                        2383777
+
+
+
+==================================================
+SECTION: MEMORY
+==================================================
+Test Name                        Passed      Num Instructions    Avg Total Cost    Avg Total Cost (without IO)
+
+:              mem_read_all.gbl  Yes                       65              2512                           1312
+:             mem_write_all.gbl  Yes                       67              2402                           1402
+
+
+bad
+['it.gbl']
+53/54 passed

@@ -2,8 +2,6 @@
 #include <climits>
 
 #include "Command.hpp"
-#include "../astUtilities/commandsUtilities/CommandIf.hpp"
-#include "../astUtilities/commandsUtilities/CommandIfElse.hpp"
 #include "../functions/validIdentifier.hpp"
 #include "../functions/makeAsmValue1.hpp"
 #include "../functions/makeAsmValue2.hpp"

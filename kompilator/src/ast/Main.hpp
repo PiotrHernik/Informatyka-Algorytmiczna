@@ -17,8 +17,6 @@ struct Main : Node{
     virtual void executeCommand(std::vector<std::shared_ptr<Procedure>>&);
     bool areMuliplyProcedure(std::vector<std::shared_ptr<Procedure>>&) const;
     void setLocation(int, int) override;
-    // std::vector<std::string> replaceSetWithLoad(std::vector<std::string>&) const;
-    // bool isSecondSetWithThisAddress(std::vector<std::string>, int, std::string) const;
     std::vector<std::string> findProcedureCallName() const;
     std::vector<std::string> makeProceduresGraph(std::vector<std::shared_ptr<Procedure>>&, std::vector<std::string>&) const;
     std::vector<std::shared_ptr<Command>> commands;

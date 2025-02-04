@@ -120,9 +120,6 @@ void Main::executeCommand(std::vector<std::shared_ptr<Procedure>>& procedures)
     
     allCommands.push_back("HALT");
 
-    // auto commandsAfterReplaceSet = replaceSetWithLoad(allCommands);
-
-
     for (auto& line : allCommands)
     {
         symbolTable.outputFile << line << std::endl;
@@ -202,76 +199,4 @@ void Main::setLocation(int lin, int col)
     line = lin;
     column = col;
 }
-
-// std::vector<std::string> Main::replaceSetWithLoad(std::vector<std::string>& asmCommands) const
-// {
-//     std::vector<std::string> setAfterHalt;
-//     std::vector<std::string> newAsmCommands;
-//     auto oldAsmSize = asmCommands.size();
-//     std::vector<long long> replacedAddress;
-
-//     newAsmCommands.push_back("JUMP " + std::to_string(oldAsmSize));
-//     for(auto i = 0; i < oldAsmSize; i++)
-//     {
-//         if (asmCommands[i].rfind("SET", 0) == 0)
-//         {
-//             size_t pos = asmCommands[i].find(' ');
-//             if (pos != std::string::npos)
-//             {
-//                 std::string address = asmCommands[i].substr(pos + 1);
-//                 auto longAddress = std::stoll(address);
-//                 if (longAddress >= -150 && longAddress <= 700 && 
-//                     (isSecondSetWithThisAddress(asmCommands, i + 1, address) 
-//                     || std::find(replacedAddress.begin(), replacedAddress.end(), longAddress) != replacedAddress.end()))
-//                 {
-//                     std::cout << "remove address: " << longAddress << std::endl;
-//                     replacedAddress.push_back(longAddress);
-//                     newAsmCommands.push_back("LOAD " + std::to_string(longAddress + 250)); // 100 - 900 cells in memory where the constant value are save
-//                     setAfterHalt.push_back("SET " + std::to_string(longAddress));
-//                     setAfterHalt.push_back("STORE " + std::to_string(longAddress + 250)); 
-//                 }
-//                 else
-//                 {
-//                    newAsmCommands.push_back(asmCommands[i]); 
-//                 }
-//             }
-            
-//         }
-//         else if(asmCommands[i].rfind("FAKEJUMP", 0) != 0)
-//         {
-//             newAsmCommands.push_back(asmCommands[i]);
-//         }
-//     }
-//     int jumpToStart = oldAsmSize + setAfterHalt.size() - 1;
-//     setAfterHalt.push_back("JUMP " + std::to_string(-jumpToStart));
-//     newAsmCommands.insert(newAsmCommands.end(), setAfterHalt.begin(), setAfterHalt.end());
-
-//     return newAsmCommands;
-
-// }
-
-// bool Main::isSecondSetWithThisAddress(std::vector<std::string> asmCommands, int i, std::string address) const
-// {
-//     for(auto j = i; j < asmCommands.size(); j++)
-//     {
-//         if (asmCommands[j].rfind("SET", 0) == 0)
-//         {
-//             size_t pos = asmCommands[j].find(' ');
-//             if (pos != std::string::npos)
-//             {
-//                 std::string address2 = asmCommands[j].substr(pos + 1);
-//                 std::cout << "address2 , address:" << address2 << address << std::endl;
-//                 if (address2 == address)
-//                 {
-//                     std::cout << "Jest drugie wystąpienie Set coś tam " << address <<  std::endl;
-//                     return true;
-//                 }
-//             }
-//         }
-//     }
-//                     std::cout << "nie drugiego wystąpienia set: " << address << std::endl;
-//     return false;
-// }
-
-
 

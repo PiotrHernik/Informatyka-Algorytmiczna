@@ -57,7 +57,7 @@ enum class CommandEnum
     PROCCALL,
     READ,
     WRITE
-}; //potrzebne?
+};
 
 
 enum class ProcedureEnum

@@ -1,0 +1,12 @@
+#Bartek Łabuz
+#prama test in(0) out(5050)
+PROGRAM IS
+    s
+BEGIN
+    READ s;
+    FOR i FROM 1 TO 100 DO
+        s := s + i;
+    ENDFOR
+
+    WRITE s;
+END
