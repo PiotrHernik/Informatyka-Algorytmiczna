@@ -1313,19 +1313,15 @@ bool CommandAssign::isMultiplication()
 {
     if (expression->expEnum != ExpressionEnum::MULT)
     {
-        std::cout << "dupa1" << std::endl;
         return false;
     }
     if (expression->value1->valEnum == ValueEnum::NUM && expression->value2->valEnum == ValueEnum::NUM)
     {
-        std::cout << "dupa2" << std::endl;
         if (expression->value1->value == 0 || expression->value2->value == 0 || !(std::abs(expression->value1->value) > (LLONG_MAX / std::abs(expression->value2->value))))
         {
-        std::cout << "dupa3" << std::endl;
             return false;
         }
     }
-        std::cout << "dupa4" << std::endl;
     return true;   
 }
 

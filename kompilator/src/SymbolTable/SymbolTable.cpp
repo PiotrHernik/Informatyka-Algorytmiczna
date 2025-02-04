@@ -75,13 +75,11 @@ bool SymbolTable::isInitialized(std::string name)
     {
         return true;
     }
-    std::cout << "Sprawdzam czy zmienna: " << name << "  jest zainicjalizowana, wynik to: " << initializedDeclarations[name] << std::endl;
     return initializedDeclarations[name];    
 }
 
 void SymbolTable::setAsInitialized(std::string name)
 {
-    std::cout << "Ustawiam zmienną: " << name << " jako zainicjalizowaną " << std::endl;
     initializedDeclarations[name] = true;
 }
 
