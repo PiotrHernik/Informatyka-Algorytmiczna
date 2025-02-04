@@ -1,3 +1,5 @@
+#Piotr Hernik 272348
+
 Program ten jest kompilatorem prostego języka imperatywnego do kodu maszyny wirtualnej. W celu dokonania kompilacji programu należy użyć procedury "make".
 Wywołanie programu jest zgodne ze specyfikacją. 
 Program został podzielony na kilka folderów.
