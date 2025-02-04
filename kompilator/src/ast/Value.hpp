@@ -14,7 +14,6 @@ struct Value : Node
 {
     Value(std::shared_ptr<Identifier>, ValueEnum);
     Value(long long, ValueEnum);
-    std::string doAsm() const override;
     void setLocation(int, int) override;
     
     ValueEnum valEnum;

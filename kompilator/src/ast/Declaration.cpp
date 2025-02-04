@@ -17,11 +17,6 @@ Declaration::Declaration(const std::string name, DeclarationEnum decEnum, long l
         }
     }
 
-std::string Declaration::doAsm() const
-{
-    return std::string("Declaration");
-}
-
 void Declaration::setLocation(int lin, int col)
 {
     line = lin;

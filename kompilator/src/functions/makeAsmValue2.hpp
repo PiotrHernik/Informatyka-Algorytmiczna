@@ -15,8 +15,8 @@ std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr
     std::vector<std::string> asmCommands;
 
     if (value2->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value2->value));
-        asmCommands.push_back("    STORE 10");
+        asmCommands.push_back("SET " + std::to_string(value2->value));
+        asmCommands.push_back("STORE 10");
         return asmCommands;
     }
 
@@ -40,30 +40,30 @@ std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr
 
         if (symbolTable.isArgument(value2->identifier->name1, DeclarationEnum::PID))
         {
-            asmCommands.push_back("    LOADI " + 
+            asmCommands.push_back("LOADI " + 
                               std::to_string(symbolTable.getPidAddress(value2->identifier->name1, isInFor)));
         }
         else
         {
-            asmCommands.push_back("    LOAD " + 
+            asmCommands.push_back("LOAD " + 
                               std::to_string(symbolTable.getPidAddress(value2->identifier->name1, isInFor)));
         }
         
-        asmCommands.push_back("    STORE 10");
+        asmCommands.push_back("STORE 10");
     } 
     else if (value2->identifier->idEnum == IdentifierEnum::PIDT) {
         if (symbolTable.isArgument(value2->identifier->name1, DeclarationEnum::TABLE))
         {
-            asmCommands.push_back("    SET " + std::to_string(value2->identifier->num));
-            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
-            asmCommands.push_back("    LOADI 0");                                                             
+            asmCommands.push_back("SET " + std::to_string(value2->identifier->num));
+            asmCommands.push_back("ADD " + std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
+            asmCommands.push_back("LOADI 0");                                                             
         }
         else
         {
-            asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(value2->identifier->name1, value2->identifier->num)));
+            asmCommands.push_back("LOAD " + std::to_string(symbolTable.getTableAddress(value2->identifier->name1, value2->identifier->num)));
         }
         
-        asmCommands.push_back("    STORE 10");
+        asmCommands.push_back("STORE 10");
     } 
     else if (value2->identifier->idEnum == IdentifierEnum::PIDTPID) {
         if (!symbolTable.isInitialized(value2->identifier->name2))
@@ -74,25 +74,25 @@ std::vector<std::string> makeAsmValue2(SymbolTable& symbolTable, std::shared_ptr
         }
         if (symbolTable.isArgument(value2->identifier->name1, DeclarationEnum::TABLE))
         {
-            asmCommands.push_back("    LOAD " + 
+            asmCommands.push_back("LOAD " + 
                               std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
         }
         else
         {
-            asmCommands.push_back("    SET " + 
+            asmCommands.push_back("SET " + 
                               std::to_string(symbolTable.getTableAddress(value2->identifier->name1)));
         }
         if (symbolTable.isArgument(value2->identifier->name2, DeclarationEnum::PID))
         {
-            asmCommands.push_back("    ADDI " + std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
+            asmCommands.push_back("ADDI " + std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
         }
         else
         {
-            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
+            asmCommands.push_back("ADD " + std::to_string(symbolTable.getPidAddress(value2->identifier->name2, isInFor)));
         }
         
-        asmCommands.push_back("    LOADI 0");
-        asmCommands.push_back("    STORE 10");
+        asmCommands.push_back("LOADI 0");
+        asmCommands.push_back("STORE 10");
         
     } 
 

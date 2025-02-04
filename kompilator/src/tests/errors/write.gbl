@@ -1,5 +1,0 @@
-PROGRAM IS
-    x, a[1:4], y
-BEGIN
-    WRITE x;
-END

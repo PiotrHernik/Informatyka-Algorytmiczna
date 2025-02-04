@@ -21,7 +21,6 @@ struct Procedure : Node
 {
     Procedure(std::shared_ptr<ProcHead>, std::vector<std::shared_ptr<Command>>, ProcedureEnum);
     Procedure(std::shared_ptr<ProcHead>, std::vector<std::shared_ptr<Declaration>>, std::vector<std::shared_ptr<Command>>, ProcedureEnum);
-    std::string doAsm() const override;
     void fillSymbolTable();
     void fillArgsAddress(SymbolTable&, std::shared_ptr<ProcCall>);
     std::vector<std::string> executeCommand(std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int);

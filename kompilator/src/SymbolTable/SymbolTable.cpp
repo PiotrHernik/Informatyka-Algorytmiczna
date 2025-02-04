@@ -7,7 +7,7 @@
 #include "../ErrorClass/Error.hpp"
 
 
-long long SymbolTable::firstFreeAddress = 100;
+long long SymbolTable::firstFreeAddress = 1000;
 std::fstream SymbolTable::outputFile("teeest.txt");
 
 SymbolTable::SymbolTable(std::string membership) : membership(membership) {}

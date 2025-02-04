@@ -19,7 +19,7 @@
 //         auto tempVec = command->executeCommand(symbolTable, procedures);
 //         asmCommandsIF.insert(asmCommandsIF.end(), tempVec.begin(), tempVec.end());
 //     }
-//     asmCommandsIF.push_back("    JUMP " + std::to_string(amountElseCommands + 1));
+//     asmCommandsIF.push_back("JUMP " + std::to_string(amountElseCommands + 1));
 //     auto amountIfCommands = asmCommandsIF.size();
 
 //     auto tempVec2 = commandIfElse.makeAsmValue2(symbolTable, isInFor);
@@ -31,32 +31,32 @@
 //     switch (condEnum)
 //     {
 //     case ConditionEnum::EQUAL:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
-//         asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JPOS " + std::to_string(amountIfCommands + 2));
+//         asmCommands.push_back("JNEG " + std::to_string(amountIfCommands + 1));
         
 //         break;
 //     case ConditionEnum::NOTEQUAL:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JZERO " + std::to_string(amountIfCommands + 1));
 //         break;
 //     case ConditionEnum::MORE:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 2));
-//         asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JNEG " + std::to_string(amountIfCommands + 2));
+//         asmCommands.push_back("JZERO " + std::to_string(amountIfCommands + 1));
 //         break;
 //     case ConditionEnum::LESS:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 2));
-//         asmCommands.push_back("    JZERO " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JPOS " + std::to_string(amountIfCommands + 2));
+//         asmCommands.push_back("JZERO " + std::to_string(amountIfCommands + 1));
 //         break;
 //     case ConditionEnum::MOREOREQUAL:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JNEG " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JNEG " + std::to_string(amountIfCommands + 1));
 //         break;
 //     case ConditionEnum::LESSOREQUAL:
-//         asmCommands.push_back("    SUB 10");
-//         asmCommands.push_back("    JPOS " + std::to_string(amountIfCommands + 1));
+//         asmCommands.push_back("SUB 10");
+//         asmCommands.push_back("JPOS " + std::to_string(amountIfCommands + 1));
 //         break;
     
 //     default:

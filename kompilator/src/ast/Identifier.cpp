@@ -10,9 +10,6 @@ Identifier::Identifier(std::string pid1, std::string pid2, IdentifierEnum idEnum
 Identifier::Identifier(std::string pid, long long num, IdentifierEnum idEnum) : name1(pid), num(num), idEnum(idEnum)
 {
 }
-std::string Identifier::doAsm() const{
-    return std::string("Identifier");
-}
 
 void Identifier::setLocation(int lin, int col)
 {

@@ -15,7 +15,7 @@ std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr
     std::vector<std::string> asmCommands;
     
     if (value1->valEnum == ValueEnum::NUM) {
-        asmCommands.push_back("    SET " + std::to_string(value1->value));
+        asmCommands.push_back("SET " + std::to_string(value1->value));
         return asmCommands;
     } 
 
@@ -38,23 +38,23 @@ std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr
         }
         
         if (symbolTable.isArgument(value1->identifier->name1, DeclarationEnum::PID))
-            asmCommands.push_back("    LOADI " + 
+            asmCommands.push_back("LOADI " + 
                               std::to_string(symbolTable.getPidAddress(value1->identifier->name1, isInFor)));
         else
-            asmCommands.push_back("    LOAD " + 
+            asmCommands.push_back("LOAD " + 
                               std::to_string(symbolTable.getPidAddress(value1->identifier->name1, isInFor)));
     } 
     else if (value1->identifier->idEnum == IdentifierEnum::PIDT) {
         if (symbolTable.isArgument(value1->identifier->name1, DeclarationEnum::TABLE))
         {
-            asmCommands.push_back("    SET " + std::to_string(value1->identifier->num));
-            asmCommands.push_back("    ADD " + std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
-            asmCommands.push_back("    LOADI 0");
+            asmCommands.push_back("SET " + std::to_string(value1->identifier->num));
+            asmCommands.push_back("ADD " + std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
+            asmCommands.push_back("LOADI 0");
 
         }
         else
         {
-            asmCommands.push_back("    LOAD " + 
+            asmCommands.push_back("LOAD " + 
                               std::to_string(symbolTable.getTableAddress(value1->identifier->name1, 
                                                                          value1->identifier->num)));
         }
@@ -69,35 +69,35 @@ std::vector<std::string> makeAsmValue1(SymbolTable& symbolTable, std::shared_ptr
 
         if (symbolTable.isArgument(value1->identifier->name1, DeclarationEnum::TABLE))
         {
-            asmCommands.push_back("    LOAD " + std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
+            asmCommands.push_back("LOAD " + std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
             if (symbolTable.isArgument(value1->identifier->name2, DeclarationEnum::PID))
             {
-                asmCommands.push_back("    ADDI " + 
+                asmCommands.push_back("ADDI " + 
                                 std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
             }
             else
             {
-                asmCommands.push_back("    ADD " + 
+                asmCommands.push_back("ADD " + 
                                 std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
             }
         }
         else
         {
-            asmCommands.push_back("    SET " + 
+            asmCommands.push_back("SET " + 
                               std::to_string(symbolTable.getTableAddress(value1->identifier->name1)));
             if (symbolTable.isArgument(value1->identifier->name2, DeclarationEnum::PID))
             {
-                asmCommands.push_back("    ADDI " + 
+                asmCommands.push_back("ADDI " + 
                                 std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
             }
             else
             {
-                asmCommands.push_back("    ADD " + 
+                asmCommands.push_back("ADD " + 
                                 std::to_string(symbolTable.getPidAddress(value1->identifier->name2, isInFor)));
             }
         }
 
-        asmCommands.push_back("    LOADI 0");
+        asmCommands.push_back("LOADI 0");
 
         
     } 

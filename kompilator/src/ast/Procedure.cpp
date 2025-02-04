@@ -22,11 +22,6 @@ Procedure::Procedure(
         symbolTable.increaseFirstFreeAddress();
     }
 
-std::string Procedure::doAsm() const
-{
-    return std::string("Procedure");
-}
-
 void Procedure::fillSymbolTable(){
     procHead->fillSymbolTable(symbolTable);
     if(procEnum == ProcedureEnum::WITHDECLARATION){
@@ -80,7 +75,7 @@ std::vector<std::string> Procedure::executeCommand(std::vector<std::shared_ptr<P
         asmCommands.insert(asmCommands.end(), tempVec.begin(), tempVec.end());
     }
 
-    asmCommands.push_back("    RTRN " + std::to_string(rntrAddress));
+    asmCommands.push_back("RTRN " + std::to_string(rntrAddress));
 
     symbolTable.increasCurrProcCall();
     

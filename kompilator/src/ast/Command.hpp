@@ -33,15 +33,10 @@ struct Command : Node
 struct CommandAssign : Command
 {
     CommandAssign(std::shared_ptr<Identifier>, std::shared_ptr<Expression>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
-    // std::vector<std::string> multiply();
-    // std::vector<std::string> divide();
     bool isMultiplication() override;
     bool isDivOrMod() override;
     std::string ifIsProcCallGetName() override;
-    // std::vector<std::string> makeAsmValue1(SymbolTable&, bool);
-    // std::vector<std::string> makeAsmValue2(SymbolTable&, bool);
 
     std::shared_ptr<Identifier> identifier;
     std::shared_ptr<Expression> expression;
@@ -51,8 +46,6 @@ struct CommandAssign : Command
 struct CommandCondition : Command
 {
 protected:
-    // std::vector<std::string> makeAsmValue1(SymbolTable&, bool) const;
-    // std::vector<std::string> makeAsmValue2(SymbolTable&, bool) const;
 
     std::shared_ptr<Condition> condition;
 };
@@ -60,7 +53,6 @@ protected:
 struct CommandIfElse : CommandCondition
 {
     CommandIfElse(std::shared_ptr<Condition>, std::vector<std::shared_ptr<Command>>, std::vector<std::shared_ptr<Command>>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -73,7 +65,6 @@ struct CommandIfElse : CommandCondition
 struct CommandIf : CommandCondition
 {
     CommandIf(std::shared_ptr<Condition>, std::vector<std::shared_ptr<Command>>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -85,7 +76,6 @@ struct CommandIf : CommandCondition
 struct CommandWhile : CommandCondition
 {
     CommandWhile(std::shared_ptr<Condition>, std::vector<std::shared_ptr<Command>>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -97,7 +87,6 @@ struct CommandWhile : CommandCondition
 struct CommandRepeat : CommandCondition
 {
     CommandRepeat(std::vector<std::shared_ptr<Command>>, std::shared_ptr<Condition>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -109,7 +98,6 @@ struct CommandRepeat : CommandCondition
 struct CommandForTo : Command
 {
     CommandForTo(std::string, std::shared_ptr<Value>, std::shared_ptr<Value>, std::vector<std::shared_ptr<Command>>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -124,7 +112,6 @@ struct CommandForTo : Command
 struct CommandDownTo : Command
 {
     CommandDownTo(std::string, std::shared_ptr<Value>, std::shared_ptr<Value>, std::vector<std::shared_ptr<Command>>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -139,7 +126,6 @@ struct CommandDownTo : Command
 struct CommandProcCall : Command
 {
     CommandProcCall(std::shared_ptr<ProcCall>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     std::string getProcedureName() const;
     bool isValidDeclared(SymbolTable& symbolTable, std::vector<std::shared_ptr<Procedure>>& procedures, std::string procCallName);
@@ -157,7 +143,6 @@ struct CommandProcCall : Command
 struct CommandRead : Command
 {
     CommandRead(std::shared_ptr<Identifier>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
@@ -169,7 +154,6 @@ struct CommandRead : Command
 struct CommandWrite : Command
 {
     CommandWrite(std::shared_ptr<Value>);
-    std::string doAsm() const override;
     std::vector<std::string> executeCommand(SymbolTable&, std::vector<std::shared_ptr<Procedure>>&, std::unordered_map<std::string, std::pair<int, int>>, int = 0, bool = false) override;
     bool isMultiplication() override;
     bool isDivOrMod() override;
