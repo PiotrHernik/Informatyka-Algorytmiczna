@@ -154,7 +154,7 @@ end
 #     This function finds the nonzero columns to the right of the given row index `r`.
 
 function getNonZeroColumnsRight(A::MySparseMatrix, r::Int)::Int
-    return min(A.blockSize + r, A.size)
+    return min(A.size, A.blockSize * (1 + floor(Int, r / A.blockSize)))
 end
 
 
