@@ -1,0 +1,3 @@
+/home/piter/myCompiler/build/CMakeFiles/myCompiler.dir
+/home/piter/myCompiler/build/CMakeFiles/edit_cache.dir
+/home/piter/myCompiler/build/CMakeFiles/rebuild_cache.dir

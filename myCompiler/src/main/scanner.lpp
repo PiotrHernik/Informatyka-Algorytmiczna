@@ -1,0 +1,88 @@
+%option c++
+%option warn debug
+%option yyclass="Scanner"
+%option noyywrap nounput noinput nodefault
+%option yylineno
+
+%top{
+#include <cstdint> // for suppressing warning C4005: 'INT8_MIN': macro redefinition
+}
+
+%{
+#include "scanner.hpp"
+#include "parser.hpp"
+
+
+// Code run each time a pattern is matched.
+#define YY_USER_ACTION  loc.columns(YYLeng());
+%}
+
+
+%%
+
+%{
+    loc.step();
+%}
+
+"PROGRAM"           { return yy::Parser::make_KW_PROGRAM(loc); }
+"PROCEDURE"         { return yy::Parser::make_KW_PROCEDURE(loc); }
+"BEGIN"             { return yy::Parser::make_KW_BEGIN(loc); }
+"END"               { return yy::Parser::make_KW_END(loc); }
+"IS"                { return yy::Parser::make_KW_IS(loc); }
+"IF"                { return yy::Parser::make_KW_IF(loc); }
+"THEN"              { return yy::Parser::make_KW_THEN(loc); }
+"ELSE"              { return yy::Parser::make_KW_ELSE(loc); }
+"ENDIF"             { return yy::Parser::make_KW_ENDIF(loc); }
+"WHILE"             { return yy::Parser::make_KW_WHILE(loc); }
+"DO"                { return yy::Parser::make_KW_DO(loc); }
+"ENDWHILE"          { return yy::Parser::make_KW_ENDWHILE(loc); }
+"REPEAT"            { return yy::Parser::make_KW_REPEAT(loc); }
+"UNTIL"             { return yy::Parser::make_KW_UNTIL(loc); }
+"FOR"               { return yy::Parser::make_KW_FOR(loc); }
+"FROM"              { return yy::Parser::make_KW_FROM(loc); }
+"TO"                { return yy::Parser::make_KW_TO(loc); }
+"ENDFOR"            { return yy::Parser::make_KW_ENDFOR(loc); }
+"DOWNTO"            { return yy::Parser::make_KW_DOWNTO(loc); }
+"READ"              { return yy::Parser::make_KW_READ(loc); }
+"WRITE"             { return yy::Parser::make_KW_WRITE(loc); }
+"T"                 { return yy::Parser::make_KW_T(loc); }
+"+"                 { return yy::Parser::make_PLUS(loc); }
+"-"                 { return yy::Parser::make_MINUS(loc); }
+"*"                 { return yy::Parser::make_MULT(loc); }
+"/"                 { return yy::Parser::make_DIV(loc); }
+"%"                 { return yy::Parser::make_MOD(loc); }
+":="                { return yy::Parser::make_ASSIGN(loc); }
+"="                 { return yy::Parser::make_EQUAL(loc); }
+"!="                { return yy::Parser::make_NEQUAL(loc); }
+">"                 { return yy::Parser::make_MORE(loc); }
+"<"                 { return yy::Parser::make_LESS(loc); }
+">="                { return yy::Parser::make_MOREOREQUAL(loc); }
+"<="                { return yy::Parser::make_LESSOREQUAL(loc); }
+"("                 { return yy::Parser::make_LPRNT(loc); }
+")"                 { return yy::Parser::make_RPRNT(loc); }
+"["                 { return yy::Parser::make_LBRACKET(loc); }
+"]"                 { return yy::Parser::make_RBRACKET(loc); }
+","                 { return yy::Parser::make_COMMA(loc); }
+":"                 { return yy::Parser::make_COLON(loc); }
+";"                 { return yy::Parser::make_SEMICOLON(loc); }
+[_a-z]+             { return yy::Parser::make_PIDENTIFIER(YYText(), loc); }
+-9223372036854775808 { try {
+                            return yy::Parser::make_NUM(std::stoll(YYText()), loc); 
+                            }
+                        catch(const std::out_of_range&){
+                            std::cerr << "Number out of range for long long " <<  yylineno  << std::endl;
+                        } }
+[0-9]+              { try {
+                            return yy::Parser::make_NUM(std::stoll(YYText()), loc); 
+                            }
+                        catch(const std::out_of_range&){
+                            std::cerr << "Number out of range for long long " <<  yylineno  << std::endl;
+                        }}
+\n                  { loc.lines(1); loc.step(); }
+"#".*                // Ignoruj komentarze lub nowe linie
+[ \t]+              { loc.step(); } // Ignoruj białe znaki
+<<EOF>>             { return yy::Parser::make_YYEOF(loc); }
+.                   { return yy::Parser::make_YYUNDEF(loc); } // Ignoruj inne znaki
+
+
+%%
