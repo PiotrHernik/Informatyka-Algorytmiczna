@@ -1,0 +1,140 @@
+piter@LAPTOP-EKHDG3UI:~/mk1-272348$ svn export https://repo.cs.pwr.edu.pl/272348-dir/mk1/wspolbiezne/lista1                                                                      
+Authentication realm: <https://repo.cs.pwr.edu.pl:443> Subversion Repository            
+Password for '272348': ***                  
+
+A    lista1                                 
+A    lista1/ada                             
+A    lista1/ada/tasks                       
+A    lista1/out1                            
+A    lista1/out3                            
+A    lista1/out5                            
+A    lista1/out1/out13                      
+A    lista1/ada/tasks/out                   
+A    lista1/ada/tasks/out1                  
+A    lista1/out3/out330                     
+A    lista1/zad35.log                       
+A    lista1/ada/tasks/out2                  
+A    lista1/ada/tasks/out4                  
+A    lista1/ada/tasks/random_seeds.adb      
+A    lista1/ada/tasks/random_seeds.ads      
+A    lista1/ada/tasks/random_seeds.ali      
+A    lista1/ada/tasks/tasks.adb             
+A    lista1/ada/tasks/tasks.gpr             
+A    lista1/ada/tasks/tasks2.adb            
+A    lista1/ada/tasks/tasks3.adb            
+A    lista1/ada/tasks/tasks4.adb            
+A    lista1/ada/tasks/tasks5.adb            
+A    lista1/ada/tasks/tasks6.adb            
+A    lista1/ada/tasks/tasks7.adb            
+A    lista1/out5/out51                      
+A    lista1/zad1.go                         
+A    lista1/zad3.go                         
+A    lista1/ada/tasks/travelers.adb         
+A    lista1/ada/tasks/travelers.ali         
+A    lista1/ada/tasks/zad2                  
+A    lista1/ada/tasks/zad2.adb              
+A    lista1/ada/tasks/zad2.ali              
+A    lista1/ada/tasks/zad4                  
+A    lista1/ada/tasks/zad4.adb              
+A    lista1/ada/tasks/zad4.ali              
+A    lista1/out1/out11                      
+A    lista1/out1/out12                      
+A    lista1/out3/out315                     
+A    lista1/out3/out350                     
+A    lista1/out5/out52                      
+A    lista1/zad1.log                        
+A    lista1/zad5.go                         
+Exported revision 60.                       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348$ cd lista1/                                          
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1$ ls                                           
+ada  out1  out3  out5  zad1.go  zad1.log  zad3.go  zad35.log  zad5.go                   
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1$ cd ada                                       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada$ ls                                       
+tasks                                       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada$ cd tasks                                 
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out   out2  random_seeds.adb  random_seeds.ali  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad4      zad4.ali                                   
+out1  out4  random_seeds.ads  tasks.adb         tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4.adb                                             
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ gnatmake zad2.adb                  
+x86_64-linux-gnu-gcc-12 -c zad2.adb         
+x86_64-linux-gnu-gcc-12 -c random_seeds.adb 
+x86_64-linux-gnu-gnatbind-12 -x zad2.ali    
+x86_64-linux-gnu-gnatlink-12 zad2.ali       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ./zad2 > out215                    
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ gnatmake zad2.adb                  
+x86_64-linux-gnu-gcc-12 -c zad2.adb         
+x86_64-linux-gnu-gnatbind-12 -x zad2.ali    
+x86_64-linux-gnu-gnatlink-12 zad2.ali       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ./zad2 > out230                                                                                                             
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ gnatmake zad2.adb                  
+x86_64-linux-gnu-gcc-12 -c zad2.adb         
+x86_64-linux-gnu-gnatbind-12 -x zad2.ali    
+x86_64-linux-gnu-gnatlink-12 zad2.ali       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ./zad2 > out260                                                                                                             
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ shasum out215                      
+32306f6c6fea4d4d5f6c20a1c028dd2a50787c2a  out215                                        
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ shasum out230                      
+0322ab67a213930e5cfd1a29eb061c7cb4e8acb4  out230                                        
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ shasum out260                      
+87bae39db7cab17d299c430e21bfb9d79da0f938  out260                                        
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ mkdir out2                         
+mkdir: cannot create directory ‘out2’: File exists                                      
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out   out2    out230  out4              random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb           
+out1  out215  out260  random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali           
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ cd out2                            
+-bash: cd: out2: Not a directory            
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out   out2    out230  out4              random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb           
+out1  out215  out260  random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali           
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out   out2    out230  out4              random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb           
+out1  out215  out260  random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali           
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ rm out out1 out2 out4              
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out215  out260            random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb                         
+out230  random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali                         
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ mkdir out2                         
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ mv out215 out230 out260 out2       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out2              random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb                                 
+random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali                                 
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ svn import out2 https://repo.cs.pwr.edu.pl/272348-dir/mk1/wspolbiezne/lista1/out2                                           
+
+Log message unchanged or not specified      
+(a)bort, (c)ontinue, (e)dit:                
+c                                           
+Authentication realm: <https://repo.cs.pwr.edu.pl:443> Subversion Repository            
+Password for '272348': ***                  
+
+Adding         out2/out215                  
+Adding         out2/out230                  
+Adding         out2/out260                  
+Committing transaction...                   
+Committed revision 61.                      
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ls                                 
+out2              random_seeds.ads  random_seeds.o  tasks.gpr   tasks3.adb  tasks5.adb  tasks7.adb     travelers.ali  zad2.adb  zad2.o  zad4.adb                                 
+random_seeds.adb  random_seeds.ali  tasks.adb       tasks2.adb  tasks4.adb  tasks6.adb  travelers.adb  zad2           zad2.ali  zad4    zad4.ali                                 
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ rm zad4                            
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ gnatmake zad4.adb                  
+x86_64-linux-gnu-gcc-12 -c zad4.adb         
+x86_64-linux-gnu-gnatbind-12 -x zad4.ali    
+x86_64-linux-gnu-gnatlink-12 zad4.ali       
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ./zad4 > out41                     
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ ./zad4 > out42                     
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ mkdir out4                         
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ mv out41 out42 out4                
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ svn import out4 https://repo.cs.pwr.edu.pl/272348-dir/mk1/wspolbiezne/lista1/out4                                           
+
+Log message unchanged or not specified      
+(a)bort, (c)ontinue, (e)dit:                
+c                                           
+Authentication realm: <https://repo.cs.pwr.edu.pl:443> Subversion Repository            
+Password for '272348': ***                  
+
+Adding         out4/out41                   
+Adding         out4/out42                   
+Committing transaction...                   
+Committed revision 62.                      
+piter@LAPTOP-EKHDG3UI:~/mk1-272348/lista1/ada/tasks$ tmux capture-pane -p -S'-' -E'-' -J > zad24.log                                                                             
+
