@@ -1,0 +1,45 @@
+k: 3
+K: 3 i: 1 maxFlow: 6
+K: 3 i: 2 maxFlow: 6
+K: 3 i: 3 maxFlow: 7
+k: 4
+K: 4 i: 1 maxFlow: 11
+K: 4 i: 2 maxFlow: 15
+K: 4 i: 3 maxFlow: 14
+K: 4 i: 4 maxFlow: 16
+k: 5
+K: 5 i: 1 maxFlow: 20
+K: 5 i: 2 maxFlow: 28
+K: 5 i: 3 maxFlow: 28
+K: 5 i: 4 maxFlow: 30
+K: 5 i: 5 maxFlow: 32
+k: 6
+K: 6 i: 1 maxFlow: 40
+K: 6 i: 2 maxFlow: 55
+K: 6 i: 3 maxFlow: 63
+K: 6 i: 4 maxFlow: 63
+K: 6 i: 5 maxFlow: 64
+k: 7
+K: 7 i: 1 maxFlow: 80
+K: 7 i: 2 maxFlow: 110
+K: 7 i: 3 maxFlow: 121
+K: 7 i: 4 maxFlow: 126
+K: 7 i: 5 maxFlow: 127
+k: 8
+K: 8 i: 1 maxFlow: 158
+K: 8 i: 2 maxFlow: 214
+K: 8 i: 3 maxFlow: 242
+K: 8 i: 4 maxFlow: 251
+K: 8 i: 5 maxFlow: 253
+k: 9
+K: 9 i: 1 maxFlow: 323
+K: 9 i: 2 maxFlow: 420
+K: 9 i: 3 maxFlow: 486
+K: 9 i: 4 maxFlow: 501
+K: 9 i: 5 maxFlow: 511
+k: 10
+K: 10 i: 1 maxFlow: 661
+K: 10 i: 2 maxFlow: 845
+K: 10 i: 3 maxFlow: 976
+K: 10 i: 4 maxFlow: 1011
+K: 10 i: 5 maxFlow: 1017

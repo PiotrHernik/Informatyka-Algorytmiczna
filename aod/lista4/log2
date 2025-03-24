@@ -1,0 +1,94 @@
+
+signal (2): Interrupt
+in expression starting at /home/piter/aod/parser.jl:31
+unknown function (ip: 0x7f92f7b47522)
+unknown function (ip: 0x7f92f7b48205)
+unknown function (ip: 0x7f92f7b48a21)
+posix_memalign at /lib/x86_64-linux-gnu/libc.so.6 (unknown line)
+jl_malloc_aligned at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gc.c:235 [inlined]
+jl_gc_big_alloc_inner at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gc.c:976 [inlined]
+jl_gc_big_alloc_noinline at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gc.c:1007 [inlined]
+jl_gc_alloc_ at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/julia_internal.h:374 [inlined]
+jl_gc_alloc at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gc.c:3372
+jl_gc_alloc_buf at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/julia_internal.h:404 [inlined]
+jl_gc_alloc_buf at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/julia_internal.h:402 [inlined]
+array_resize_buffer at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/array.c:698
+jl_array_grow_at_end at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/array.c:893
+_growend! at ./array.jl:1011 [inlined]
+push! at ./array.jl:1058 [inlined]
+_setindex! at /home/piter/.julia/packages/OrderedCollections/5e4BO/src/ordered_dict.jl:312
+setindex! at /home/piter/.julia/packages/OrderedCollections/5e4BO/src/ordered_dict.jl:340 [inlined]
+_add_or_set! at /home/piter/.julia/packages/JuMP/FEKLB/src/aff_expr.jl:26
+add_to_expression! at /home/piter/.julia/packages/JuMP/FEKLB/src/aff_expr.jl:552 [inlined]
+operate! at /home/piter/.julia/packages/JuMP/FEKLB/src/mutable_arithmetics.jl:200 [inlined]
+operate_fallback!! at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/interface.jl:632 [inlined]
+operate!! at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/interface.jl:616 [inlined]
+add!! at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/shortcuts.jl:21 [inlined]
+BottomRF at ./reduce.jl:81 [inlined]
+_foldl_impl at ./reduce.jl:62
+foldl_impl at ./reduce.jl:48 [inlined]
+mapfoldl_impl at ./reduce.jl:44 [inlined]
+_mapreduce_dim at ./reducedim.jl:362 [inlined]
+#mapreduce#765 at ./reducedim.jl:357 [inlined]
+mapreduce##kw at ./reducedim.jl:357 [inlined]
+#operate#2 at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/reduce.jl:58 [inlined]
+operate##kw at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/reduce.jl:53 [inlined]
+#sum#25 at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/dispatch.jl:27 [inlined]
+sum at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/dispatch.jl:16
+unknown function (ip: 0x7f92aae36f82)
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+macro expansion at /home/piter/.julia/packages/MutableArithmetics/BLlgj/src/rewrite.jl:371 [inlined]
+macro expansion at /home/piter/.julia/packages/JuMP/FEKLB/src/macros.jl:257 [inlined]
+macro expansion at /home/piter/.julia/packages/JuMP/FEKLB/src/macros/@constraint.jl:171 [inlined]
+#3 at /home/piter/.julia/packages/JuMP/FEKLB/src/Containers/macro.jl:545
+#91 at /home/piter/.julia/packages/JuMP/FEKLB/src/Containers/container.jl:144
+iterate at ./generator.jl:47 [inlined]
+grow_to! at ./dict.jl:162
+unknown function (ip: 0x7f92aae45b7d)
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+grow_to! at ./dict.jl:145
+dict_with_eltype at ./abstractdict.jl:584 [inlined]
+NoDuplicateDict at /home/piter/.julia/packages/JuMP/FEKLB/src/Containers/no_duplicate_dict.jl:50
+unknown function (ip: 0x7f92aae436ad)
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+container at /home/piter/.julia/packages/JuMP/FEKLB/src/Containers/container.jl:147
+container at /home/piter/.julia/packages/JuMP/FEKLB/src/Containers/container.jl:75
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+jl_apply at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/julia.h:1839 [inlined]
+do_call at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/interpreter.c:126
+eval_value at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/interpreter.c:215
+eval_stmt_value at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/interpreter.c:166 [inlined]
+eval_body at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/interpreter.c:612
+jl_interpret_toplevel_thunk at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/interpreter.c:750
+jl_toplevel_eval_flex at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/toplevel.c:906
+jl_toplevel_eval_flex at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/toplevel.c:850
+ijl_toplevel_eval_in at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/toplevel.c:965
+eval at ./boot.jl:368 [inlined]
+include_string at ./loading.jl:1428
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+_include at ./loading.jl:1488
+include at ./Base.jl:419
+jfptr_include_55781.clone_1 at /home/piter/programs/julia-1.8.2/lib/julia/sys.so (unknown line)
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+exec_options at ./client.jl:303
+_start at ./client.jl:522
+jfptr__start_56736.clone_1 at /home/piter/programs/julia-1.8.2/lib/julia/sys.so (unknown line)
+_jl_invoke at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2367 [inlined]
+ijl_apply_generic at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/gf.c:2549
+jl_apply at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/julia.h:1839 [inlined]
+true_main at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/jlapi.c:575
+jl_repl_entrypoint at /cache/build/default-amdci4-6/julialang/julia-release-1-dot-8/src/jlapi.c:719
+main at julia (unknown line)
+unknown function (ip: 0x7f92f7ac51c9)
+__libc_start_main at /lib/x86_64-linux-gnu/libc.so.6 (unknown line)
+unknown function (ip: 0x401098)
+unknown function (ip: (nil))
+Allocations: 231033920 (Pool: 230901008; Big: 132912); GC: 27
+loading JuMP
+loading GLPK solver
