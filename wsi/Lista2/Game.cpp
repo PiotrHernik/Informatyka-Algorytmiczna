@@ -11,6 +11,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <climits>
 
 Game::Game(std::vector<std::shared_ptr<IHeuristics>> heuristics, unsigned int size) : heuristics_(heuristics), size_(size)
 {
@@ -143,123 +144,117 @@ int Game::getHeuristicValue(int64_t actualState, int64_t finalState) const
     return heuristicValue;
 }
 
-std::vector<int64_t> Game::findShortestPath2(int64_t start, int64_t end) const
-{
+std::vector<int64_t> Game::findShortestPath2(int64_t start, int64_t end) const {
     std::vector<int64_t> path;
-    if (start == end)
-        return {start};
+    if (start == end) return {start};
 
-    // size_t visitedCountF = 0, visitedCountB = 0;
+    size_t visitedCountF = 0, visitedCountB = 0;
 
-    std::unordered_set<int64_t> visitedF, visitedB;
+    std::unordered_map<int64_t, int> gcostF, gcostB;
     std::unordered_map<int64_t, int64_t> parentF, parentB;
-
-    auto cmp = [](const BoardState& a, const BoardState& b) {
-        return (a.gcost + a.hcost) > (b.gcost + b.hcost);
+    auto cmp = [](const std::pair<int64_t, int>& a, const std::pair<int64_t, int>& b) {
+        return a.second > b.second;
     };
 
-    std::priority_queue<BoardState, std::vector<BoardState>, decltype(cmp)> queueF(cmp);
-    std::priority_queue<BoardState, std::vector<BoardState>, decltype(cmp)> queueB(cmp);
+    std::priority_queue<std::pair<int64_t, int>, std::vector<std::pair<int64_t, int>>, decltype(cmp)> queueF(cmp);
+    std::priority_queue<std::pair<int64_t, int>, std::vector<std::pair<int64_t, int>>, decltype(cmp)> queueB(cmp);
 
-    queueF.push({start, 0, getHeuristicValue(start, end)});
-    queueB.push({end, 0, getHeuristicValue(end, start)});
+    gcostF[start] = 0;
+    gcostB[end] = 0;
+    queueF.push({start, getHeuristicValue(start, end)});
+    queueB.push({end, getHeuristicValue(end, start)});
     parentF[start] = -1;
     parentB[end] = -1;
 
     int64_t meetingPoint = -1;
+    int bestCost = INT_MAX;
 
-    auto expand = [&](auto& queue, auto& visited, auto& parent, auto& otherVisited, bool forward) -> int64_t {
-        if (queue.empty()) return -1;
+    auto processNode = [&](auto& queue, auto& gcost, auto& parent, auto& other_gcost, bool forward) -> bool {
+        if (queue.empty()) return false;
 
-        BoardState current = queue.top();
-        while ( visited.count(current.boardState) || otherVisited.count(current.boardState) )
-        {
-            queue.pop();
-            if (queue.empty()) return -1;
-            current = queue.top();
-        }
+        auto current = queue.top();
         queue.pop();
+        int64_t currentState = current.first;
+        int currentF = current.second;
 
-        visited.insert(current.boardState);
-        parent[current.boardState] = current.parent;
-
-        if (forward)
-            ++visitedCountF;
-        else
-            ++visitedCountB;
-
-        if ((forward ? visitedCountF : visitedCountB) % 1000000 == 0)
-        {
-            std::cout << (forward ? "[F] " : "[B] ")
-                      << "Visited states: " << (forward ? visitedCountF : visitedCountB) << std::endl;
+        if (forward) {
+            visitedCountF++;
+        } else {
+            visitedCountB++;
         }
 
-        for (int64_t next : generateNeighbors(current.boardState)) {
-            // if (parent.count(next))
-            //     continue;
+        // Jeśli znaleźliśmy już lepsze rozwiązanie, pomiń
+        if (currentF >= bestCost) return false;
 
-            if (visited.count(next))
-                continue;
+        // Sprawdź czy ten węzeł nie został już przetworzony z lepszym kosztem
+        if (gcost[currentState] < currentF - (forward ? getHeuristicValue(currentState, end) : getHeuristicValue(currentState, start))) {
+            return false;
+        }
 
-            if (otherVisited.count(next)) {
-                parent[next] = current.boardState;
-                return next;  // Spotkanie!
+        // Sprawdź czy węzeł istnieje w drugiej kolejce
+        if (other_gcost.count(currentState)) {
+            int totalCost = gcost[currentState] + other_gcost[currentState];
+            if (totalCost < bestCost) {
+                bestCost = totalCost;
+                meetingPoint = currentState;
             }
-
-            int g = current.gcost + 1;
-            int h = forward ? getHeuristicValue(next, end) : getHeuristicValue(next, start);
-
-            queue.push(BoardState(next, g, h, current.boardState));
+            return false;
         }
 
-        return -1;
+        for (int64_t next : generateNeighbors(currentState)) {
+            int newG = gcost[currentState] + 1;
+            if (!gcost.count(next) || newG < gcost[next]) {
+                gcost[next] = newG;
+                int h = forward ? getHeuristicValue(next, end) : getHeuristicValue(next, start);
+                int f = newG + h;
+                parent[next] = currentState;
+                queue.push({next, f});
+            }
+        }
+
+        return true;
     };
 
-    while (!queueF.empty() && !queueB.empty())
-    {
-        // Porównaj F-costy z obu stron i rozwijaj "lepszą"
-        int fFront = queueF.top().gcost + queueF.top().hcost;
-        int fBack = queueB.top().gcost + queueB.top().hcost;
+    while (!queueF.empty() || !queueB.empty()) {
+        // Wybierz kolejkę z niższym minimalnym F-cost
+        int minF = queueF.empty() ? INT_MAX : queueF.top().second;
+        int minB = queueB.empty() ? INT_MAX : queueB.top().second;
 
-        if (fFront <= fBack)
-        {
-            meetingPoint = expand(queueF, visitedF, parentF, visitedB, true);
-        }
-        else
-        {
-            meetingPoint = expand(queueB, visitedB, parentB, visitedF, false);
+        if (minF <= minB) {
+            if (!processNode(queueF, gcostF, parentF, gcostB, true)) continue;
+        } else {
+            if (!processNode(queueB, gcostB, parentB, gcostF, false)) continue;
         }
 
-        if (meetingPoint != -1)
-            break;
+        if (meetingPoint != -1) break;
     }
 
-    if (meetingPoint == -1)
-    {
+    std::cout << "Search completed. Visited states - F: " << std::dec << visitedCountF 
+              << ", B: " << visitedCountB << ", Total: " << (visitedCountF + visitedCountB) << std::endl;
+
+    if (meetingPoint == -1) {
         std::cerr << "No path found from start to end." << std::endl;
         return path;
     }
 
-    // Odtwarzanie ścieżki z przodu
+    // Reconstruct path
     std::vector<int64_t> forwardPath;
     int64_t cur = meetingPoint;
-    while (cur != -1)
-    {
+    while (cur != -1) {
         forwardPath.push_back(cur);
         cur = parentF[cur];
     }
     std::reverse(forwardPath.begin(), forwardPath.end());
 
-    // Odtwarzanie ścieżki z tyłu
     std::vector<int64_t> backwardPath;
     cur = parentB[meetingPoint];
-    while (cur != -1)
-    {
+    while (cur != -1) {
         backwardPath.push_back(cur);
         cur = parentB[cur];
     }
 
-    // Łączenie ścieżek
+    visitedCount = visitedCountB + visitedCountF;
+
     path = forwardPath;
     path.insert(path.end(), backwardPath.begin(), backwardPath.end());
 
@@ -268,6 +263,10 @@ std::vector<int64_t> Game::findShortestPath2(int64_t start, int64_t end) const
 
 std::vector<int64_t> Game::findShortestPath(int64_t start, int64_t end) const
 {
+    if (!validate(start))
+    {
+        std::cerr << " Zły input " << std::endl;
+    }
     visitedCount = 0;
     std::vector<int64_t> path;
     std::unordered_set<int64_t> visited;
@@ -330,6 +329,8 @@ std::vector<int64_t> Game::findShortestPath(int64_t start, int64_t end) const
         current = parentMap[current];
     }
     std::reverse(path.begin(), path.end());
+
+    std::cout << "visited states: " << std::dec << visited.size() << std::endl;
 
     return path;
 }
